@@ -1458,9 +1458,6 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
-				--self:NPC_TaskELB_LockedDoor()
-				self:WalkToAttempt(square)
-				self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
 		end
 		
 		self:WalkToAttempt(square)
@@ -1691,7 +1688,7 @@ function SuperSurvivor:NPC_TaskELB_LockedDoor()
 		-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
 		self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-		self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+		self:getTaskManager():AddToTop(WanderInBuildingTask:new(self, self:Get():getCurrentSquare()))
 		self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 	else
 	return false end -- So that it doesn't spam trigger outside
@@ -2042,7 +2039,7 @@ function SuperSurvivor:update()
 	
 	if( self.GoFindThisCounter > 0 ) then self.GoFindThisCounter = self.GoFindThisCounter -1 end
 	
-	self:NPC_TaskELB_LockedDoor()
+	-- self:NPC_TaskELB_LockedDoor()
 	
 end
 
