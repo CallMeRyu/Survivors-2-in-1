@@ -1450,7 +1450,7 @@ function SuperSurvivor:walkTo(square)
 	
 	local adjacent = AdjacentFreeTileFinder.Find(parent, self.player);
 --	if instanceof(square, "IsoWindow") or instanceof(square, "IsoDoor") then
-	if (instanceof(square, "IsoWindow") and (not square:isBarricaded())) or (instanceof(square, "IsoDoor") and (not square:isLocked() or square:isLockedByKey() or square:isBarricaded())) then
+	if (instanceof(square, "IsoWindow") and (not instanceof(square, "IsoWindow"):isBarricaded())) or (instanceof(square, "IsoDoor") and ((not instanceof(square, "IsoDoor"):isLocked()) or (not instanceof(square, "IsoDoor"):isLockedByKey()) or (not instanceof(square, "IsoDoor"):isBarricaded()))) then
 		adjacent = AdjacentFreeTileFinder.FindWindowOrDoor(parent, square, self.player);
 	end
 	if adjacent ~= nil then
@@ -1458,11 +1458,9 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
-				--self:NPC_TaskELB_LockedDoor()
-				self:WalkToAttempt(square)
-				self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
 		end
 		
+		--self:NPC_TaskELB_LockedDoor()
 		self:WalkToAttempt(square)
 		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
 	end
@@ -1688,11 +1686,12 @@ end
 -- Since this setup was being used multiple times. 
 function SuperSurvivor:NPC_TaskELB_LockedDoor()
 	if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-		-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+		self:getTaskManager():AddToTop(WanderInBuildingTask:new(self))
 		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
 		self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 		self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 		self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+	
 	else
 	return false end -- So that it doesn't spam trigger outside
 end
@@ -1941,9 +1940,9 @@ function SuperSurvivor:update()
 	
 
 	if (self.TargetSquare ~= nil and self.TargetSquare:getZ() ~= self.player:getZ() and getGameSpeed() > 2) then
-		print("DANGER ZONE 2: " .. self:getName());
+		self:DebugSay("DANGER ZONE 2: " .. self:getName());
 		self.TargetSquare = nil
-		self:StopWalk()
+		--self:StopWalk()
 		self:Wait(10)
 	end
 
@@ -1961,30 +1960,30 @@ function SuperSurvivor:update()
 	
 	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring(self:inFrontOfLockedDoor()) ..",".. tostring(self:getTaskManager():getCurrentTask() ~= "Enter New Building") ..",".. tostring(self.TargetBuilding ~= nil))
 	--print( self:getName()..": "..tostring((self.TargetBuilding ~= nil)))
-	if (
-		(self:inFrontOfLockedDoor())
-		or
-		(self:inFrontOfWindow())
-	) and (
-		self:getTaskManager():getCurrentTask() ~= "Enter New Building"
-	) and (
-		self.TargetBuilding ~= nil
-	) and (
-		(
-			(self.TicksSinceSquareChanged > 6)
-			and (self:isInAction() == false)
-			and (
-				self:getCurrentTask() == "None"
-				or self:getCurrentTask() == "Find This"
-				or self:getCurrentTask() == "Find New Building"
-			)
-		) or (self:getCurrentTask() == "Pursue")
-	) then
-		print(self:getName().." Attempt Entry1")
-		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-		self.TicksSinceSquareChanged = 0
-	end
-	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring((self:inFrontOfWindow())))
+--	if (
+--		(self:inFrontOfLockedDoor())
+--		or
+--		(self:inFrontOfWindow())
+--	) and (
+--		self:getTaskManager():getCurrentTask() ~= "Enter New Building"
+--	) and (
+--		self.TargetBuilding ~= nil
+--	) and (
+--		(
+--			(self.TicksSinceSquareChanged > 6)
+--			and (self:isInAction() == false)
+--			and (
+--				self:getCurrentTask() == "None"
+--				or self:getCurrentTask() == "Find This"
+--				or self:getCurrentTask() == "Find New Building"
+--			)
+--		) or (self:getCurrentTask() == "Pursue")
+--	) then
+--		print(self:getName().." Attempt Entry1")
+--		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+--		self.TicksSinceSquareChanged = 0
+--	end
+--	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring((self:inFrontOfWindow())))
 	
 	if (self.TicksSinceSquareChanged > 9) and (self:isInAction() == false) and (self:inFrontOfWindow()) and (self:getCurrentTask() ~= "Enter New Building") then
 		self.player:climbThroughWindow(self:inFrontOfWindow())
@@ -2042,7 +2041,7 @@ function SuperSurvivor:update()
 	
 	if( self.GoFindThisCounter > 0 ) then self.GoFindThisCounter = self.GoFindThisCounter -1 end
 	
-	self:NPC_TaskELB_LockedDoor()
+	--self:NPC_TaskELB_LockedDoor()
 	
 end
 
@@ -2118,7 +2117,7 @@ end
 
 function SuperSurvivor:StopWalk()
 	
-	--print(self:getName() .. " StopWalk");
+	self:DebugSay(self:getName() .. " StopWalk triggered. Current task - "..tostring(self:getTaskManager():getTask()))
 	ISTimedActionQueue.clear(self.player)
 	self.player:StopAllActionQueue()
 	self.player:setPath2(nil)
@@ -2841,9 +2840,9 @@ function SuperSurvivor:NPC_MovementManagement()
 		else
 			local fs = cs:getTileInDirection(self.LastEnemeySeen:getDir())
 			if(fs) and (fs:isFree(true)) then
-				self:walkToDirect(fs)
+				self:walkTo(fs)
 			else 
-				self:walkToDirect(cs) 
+				self:walkTo(cs) 
 			end	
 		end
 	

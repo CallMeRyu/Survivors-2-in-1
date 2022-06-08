@@ -58,19 +58,22 @@ function PursueTask:update()
 		if(distancetoLastSpotSeen > 2.5) then
 		
 			self.parent:setRunning(true) 						
-			
-			self.parent:walkToDirect(self.LastSquareSeen)
+			if not self.parent:inFrontOfLockedDoor() then
+				self.parent:walkTo(self.LastSquareSeen)
+			else
+				self.parent:NPC_MovementManagement()
+			end
 			
 			if(ZombRand(4) == 0) and (self.parent:isSpeaking() == false) then
 				self.parent:Speak(getSpeech("SawHimThere"))
-			end
+				end
 			
 		else
 			self.parent:setRunning(false)
 			self.Complete = true
 			self.parent:Speak(getText("ContextMenu_SD_WhereHeGo"))
 		end
-	
+		
 	else
 		local theDistance = getDistanceBetween(self.Target, self.parent.player)
 		
@@ -83,7 +86,7 @@ function PursueTask:update()
 		else self.parent:setRunning(false) end
 		
 		
-		self.parent:walkToDirect(self.Target:getCurrentSquare())
+		self.parent:walkTo(self.Target:getCurrentSquare())
 	end
 	
 	
