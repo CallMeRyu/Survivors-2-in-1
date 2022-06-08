@@ -1449,7 +1449,8 @@ function SuperSurvivor:walkTo(square)
 	if(square:getRoom() ~= nil) and (square:getRoom():getBuilding() ~= nil) then self.TargetBuilding = square:getRoom():getBuilding() end
 	
 	local adjacent = AdjacentFreeTileFinder.Find(parent, self.player);
-	if instanceof(square, "IsoWindow") or instanceof(square, "IsoDoor") then
+--	if instanceof(square, "IsoWindow") or instanceof(square, "IsoDoor") then
+	if (instanceof(square, "IsoWindow") and (not square:isBarricaded())) or (instanceof(square, "IsoDoor") and (not square:isLocked() or square:isLockedByKey() or square:isBarricaded())) then
 		adjacent = AdjacentFreeTileFinder.FindWindowOrDoor(parent, square, self.player);
 	end
 	if adjacent ~= nil then
@@ -1457,14 +1458,10 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-			-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				--self:NPC_TaskELB_LockedDoor()
+				self:WalkToAttempt(square)
+				self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
 		end
-	end
 		
 		self:WalkToAttempt(square)
 		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
@@ -1670,7 +1667,7 @@ function SuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding()
 		(self:getTaskManager():getCurrentTask() ~= "Enter New Building") and			-- AttemptEntryIntoBuildingTask
 		 (
 			(self:getTaskManager():getCurrentTask() == "Find New Building") or			-- FindUnlootedBuildingTask
-		--	(self:getTaskManager():getCurrentTask() == "Flee From Spot") or
+		--	(self:getTaskManager():getCurrentTask() == "Flee From Spot") or					-- Using this task to manage away from this function
 			(self:getTaskManager():getCurrentTask() == "Wander In Area") or
 			(self:getTaskManager():getCurrentTask() == "Wander In Base") or
 			(self:getTaskManager():getCurrentTask() == "Loot Category") or
@@ -1686,8 +1683,21 @@ function SuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding()
 	else
 		return false
 	end
-	
 end
+
+-- Since this setup was being used multiple times. 
+function SuperSurvivor:NPC_TaskELB_LockedDoor()
+	if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
+		-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+		self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+		self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+		self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+	else
+	return false end -- So that it doesn't spam trigger outside
+end
+
+
 
 
 function SuperSurvivor:inFrontOfStairs()
@@ -2032,12 +2042,7 @@ function SuperSurvivor:update()
 	
 	if( self.GoFindThisCounter > 0 ) then self.GoFindThisCounter = self.GoFindThisCounter -1 end
 	
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-			-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-		end
+	self:NPC_TaskELB_LockedDoor()
 	
 end
 
@@ -2072,6 +2077,7 @@ function SuperSurvivor:PlayerUpdate()
 	
 		if(self.TriggerHeldDown) and (self:CanAttackAlt()) then -- simulate automatic weapon fire
 			self:NPC_Attack(self.LastEnemeySeen)
+			self:DebugSay("PlayerUpdate - NPC_Attack was triggered")
 		end
 		
 		if(self.player:getLastSquare() ~= nil ) then
@@ -2819,15 +2825,17 @@ function SuperSurvivor:AtkTicks_Countdown()
 		self:DebugSay("AtkTicks: "..tostring(self.AtkTicks))
 end
 
--- Manages movement and movement speed
+-- Manages movement and movement speed. This was taken from AttackTask and implimented and modified as a function. 
+-- Currently being used in AttackTask and ThreatenTask
 function SuperSurvivor:NPC_MovementManagement()
-	local distance = getDistanceBetween(self.player,self.LastEnemeySeen)
-	local RealDistance = getDistanceBetween(self.player,self.LastEnemeySeen)
-	local minrange = self:getMinWeaponRange()
-	local cs = self.LastEnemeySeen:getCurrentSquare()
-	
 	if (self.LastEnemeySeen ~= nil) then
-		-- The actual walking itself
+		local distance = getDistanceBetween(self.player,self.LastEnemeySeen)
+		local RealDistance = getDistanceBetween(self.player,self.LastEnemeySeen)
+		local minrange = self:getMinWeaponRange()
+		local cs = self.LastEnemeySeen:getCurrentSquare()
+		
+		self:setSneaking(false) -- Let's make sure NPCs don't get stuck
+		
 		if(instanceof(self.LastEnemeySeen,"IsoPlayer")) then
 			self:walkToDirect(cs)
 		else
@@ -2848,8 +2856,7 @@ function SuperSurvivor:NPC_MovementManagement()
 		self:DebugSay("Movement Management: No Target found.")
 		return false
 	end
-	
-		self:DebugSay("MovementManagement: "..tostring(self.AtkTicks))
+	self:DebugSay("MovementManagement: "..tostring(self.AtkTicks))
 end
  
 function SuperSurvivor:CanAttackAlt()
@@ -2862,7 +2869,8 @@ function SuperSurvivor:CanAttackAlt()
 		return false
 	end
 end
--- The new function that will now control NPC attacking. Not perfect, but. Cleaner code, and works better-ish.
+
+-- The new function that will now control NPC attacking. Not perfect, but. Cleaner code, and works better than the other attack function.
 function SuperSurvivor:NPC_Attack(victim) -- New Function 
 
 	-- Create the attack cooldown. (once 0, the npc will do the 'attack' then set the time back up by 1, so anti-attack spam method)
@@ -2884,7 +2892,6 @@ function SuperSurvivor:NPC_Attack(victim) -- New Function
 	-- Makes sure if the npc has their weapon out first 
 	if(self:WeaponReady()) then 
 		self:StopWalk()
-		-- Makes sure the stances is set
 		self.player:NPCSetAiming(true) -- Visually animate 
 		self.player:NPCSetAttack(true) -- Visually animate 
 		self.player:faceThisObject(victim)
@@ -2895,12 +2902,11 @@ function SuperSurvivor:NPC_Attack(victim) -- New Function
 		damage = weapon:getMaxDamage();
 	end
 	
-	-- Movement Management 
-	-- So far, this isn't needed, since attacktask is managing this.
+	-- Do not uncomment this. AttackTask is managing the movement.
 	-- self:NPC_MovementManagement() -- That way npcs will see if they need to get closer or not
 
 	-- Hitting the entity in question
---	if((RealDistance <= minrange) or (RealDistance <= 0.65)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
+	-- if((RealDistance <= minrange) or (RealDistance <= 0.65)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
 	if((RealDistance <= minrange)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
 		victim:Hit(weapon, self.player, damage, false, 1.0, false)
 		self.AtkTicks = 3
