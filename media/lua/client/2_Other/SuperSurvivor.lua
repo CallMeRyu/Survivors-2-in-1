@@ -1450,7 +1450,7 @@ function SuperSurvivor:walkTo(square)
 	
 	local adjacent = AdjacentFreeTileFinder.Find(parent, self.player);
 --	if instanceof(square, "IsoWindow") or instanceof(square, "IsoDoor") then
-	if (instanceof(square, "IsoWindow") and (not square:isBarricaded())) or (instanceof(square, "IsoDoor") and (not square:isLocked() or square:isLockedByKey() or square:isBarricaded())) then
+	if ((instanceof(square, "IsoWindow") and (not instanceof(square, "IsoWindow"):isBarricaded())) or (instanceof(square, "IsoDoor") and ((not instanceof(square, "IsoDoor"):isLocked()) or (not instanceof(square, "IsoDoor"):isLockedByKey()) or (not instanceof(square, "IsoDoor"):isBarricaded())))) and (not instanceof(square, "IsoTree")) then
 		adjacent = AdjacentFreeTileFinder.FindWindowOrDoor(parent, square, self.player);
 	end
 	if adjacent ~= nil then
