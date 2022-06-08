@@ -98,7 +98,6 @@ function ThreatenTask:update()
 	if(self.parent.player:IsAttackRange(self.Aite:getX(),self.Aite:getY(),self.Aite:getZ())) or (self.theDistance < 0.65 )then
 			
 			self.parent:StopWalk()
-			self.parent:setRunning(true)
 			self.parent.player:NPCSetAiming(true)
 			self.parent.player:faceThisObject(self.Aite.player)	
 				if(self.StartedThreatening == false) then
@@ -106,24 +105,23 @@ function ThreatenTask:update()
 					self.DistanceAtThreat = self.theDistance
 					self.SquareAtThreat = self.Aite.player:getCurrentSquare()
 					
---					if self.Aite.player:isLocalPlayer() == false then
---						self.Aite:StopWalk()
---						self.Aite:getTaskManager():clear()
---						self.Aite:getTaskManager():AddToTop(FleeFromHereTask:new(self.parent, self.Aite.player:getCurrentSquare()))	
---						--self.Aite:getTaskManager():AddToTop(SurenderTask:new(self.parent, self.Aite))											
---					end
+					if self.Aite.player:isLocalPlayer() == false then
+						self.Aite:StopWalk()
+						self.Aite:getTaskManager():clear()
+						self.Aite:getTaskManager():AddToTop(FleeFromHereTask:new(self.parent, self.Aite.player:getCurrentSquare()))	
+						--self.Aite:getTaskManager():AddToTop(SurenderTask:new(self.parent, self.Aite))											
+					end
 					self.StartedThreatening = true
 				end
 		
-	elseif(self.parent:isWalkingPermitted()) then
+	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
 		
 	local cs = self.Aite.player:getCurrentSquare()
 	
-	if (not self.parent:inFrontOfLockedDoor()) and (not self.parent:NPC_IsOutside()) then
-		self.parent:walkToDirect(cs)
-	else
-		self.parent:NPC_MovementManagement()
-	end
+	self.parent:walkToDirect(cs)
+	
+	-- The new function to make NPCs actually run if they're too far away from their target
+	self.parent:NPC_MovementManagement()
 	
 	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
