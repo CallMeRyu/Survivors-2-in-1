@@ -1,0 +1,13 @@
+name=Survivors 2 in 1
+poster=poster.png
+icon=icon.png
+id=SubparSurvivors
+description=I combined the Superb Survivor Mod and the Subpar Survivor Mod, and removed the 4 maps the Superb Survivor Mod contained, mainly because there are no survivors but only zombies in these so called "survivor camps",and the prison escape challenge is so glitchy that whenever I enters the game the frame drops, while the CPU usage remains low.
+description=I also removed the object "Human Meat" from the Subpar Survivor Mod, because it's terrifying, and I bet no one is killing NPCs only for their meat apparently.
+description=You can choose to either enable the Superb Survivor Mod and the Subpar Survivor Mod, or this mod. Nothing changed except the things mentioned above.
+description=Give thanks to Nolanritchie and SlightlyMadman who created these two great mods. Sad that they won't continue updating it. 
+description=<Line>【幸存者2合1】
+description=我把Steam上原有的两个幸存者mod集成到了一个mod里，并移除了4个幸存者营地出生点。 由于版本更新现在那些“幸存者营地”里已经没有幸存者了。 这四个出生点和它们的地图都已经从大地图上移除了。 
+description=由于很多玩家会觉得难以接受, “新鲜的人肉”这个物品也移除了。 这个mod和Superb Survivor Mod、Subpar Survivor Mod这两个mod, 选其中之一开启就行了, 除了上述提到的改变之外， 最新的更新使得
+description=持枪/近战幸存者均可以对僵尸造成伤害了， 而且部分幸存者不再免疫你的攻击。 为了确保mod运行顺利， 推荐先取消订阅Subpar Survivor mod， 并开启新的存档以达成最佳的游戏体验。
+versionMin=41.1
