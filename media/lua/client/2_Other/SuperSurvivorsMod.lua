@@ -1036,7 +1036,9 @@ function SuperSurvivorsRaiderManager()
 				raider.player:getModData().isRobber = true
 				local name = raider:getName()
 				raider:setName("Raider "..name)
-				raider:getTaskManager():AddToTop(PursueTask:new(raider,mySS:Get()))
+					if (raider.WalkToTicks <= 0) then
+						raider:getTaskManager():AddToTop(PursueTask:new(raider,mySS:Get()))
+					end
 				if(raider:hasWeapon() == false) then raider:giveWeapon(MeleWeapons[ZombRand(1,#MeleWeapons)]) end
 			
 				local food, bag

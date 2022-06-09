@@ -73,13 +73,13 @@ function ThreatenTask:dealComplete()
 end
 
 function ThreatenTask:update()
-	
+
+	-- Added this to stop threatening spam
+	if ((getDistanceBetween(self.Aite, self.parent.player) >= 8) or (self.parent:inFrontOfLockedDoor())) and (not self.parent.player:CanSee(self.Aite.player)) then return false end 
+
 	if(not self:isValid()) or (self:isComplete()) then return false end
 	 self.theDistance = getDistanceBetween(self.Aite, self.parent.player)
-	
-	-- Added this to stop threatening spam
-	if (self.theDistance >= 8 or self.parent:inFrontOfLockedDoor()) and (not self.parent.player:CanSee(self.Aite.player)) then return false end 
-	
+		
 	if(self.StartedThreatening == true) then
 		if(self:dealBreaker()) then 			 
 			--self.parent.player:getModData().isRobber = false
@@ -117,7 +117,7 @@ function ThreatenTask:update()
 					self.StartedThreatening = true
 				end
 		
-	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
+	elseif(self.parent:isWalkingPermitted() or (not self.parent:inFrontOfLockedDoor())) then
 		
 	local cs = self.Aite.player:getCurrentSquare()
 		
@@ -130,12 +130,15 @@ function ThreatenTask:update()
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
 	else
 		-- Attempted failsafe to make the NPC re-calculate the player. In this case it should be saying 'if npc is at locked door and not walkingpermitted, then do thing.
-		if (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 10) then
-			local csa = self.Aite.player:getCurrentSquare()
+		-- 0 would only happen if not in front of door. the walkto function checks for ifinfrontoflocked door, and forces it to 15
+		-- As a result, it will only check for player's active position every 15 ticks (roughly 7 seconds)
+		if (self.parent:inFrontOfLockedDoor()) and (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 7) and (self.parent.WalkToTicks <= 0) then
+			self.SquareAtThreat = self.Aite.player:getCurrentSquare()
+			local csa = self.SquareAtThreat
 			self.parent:walkTo(csa)
 		end
-		self.parent:DebugSay("ThreatenTask:update - something is wrong, attempting to fix")
-	--	return false
+		self.parent:DebugSay("ThreatenTask:update - something is wrong, attempting to fix. WalkToTicks = "..tostring(self.parent.WalkToTicks))
+		return false
 	end
 	
 	
