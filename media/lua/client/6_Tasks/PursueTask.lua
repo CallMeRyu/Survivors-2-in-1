@@ -92,17 +92,22 @@ function PursueTask:update()
 		self.LastSquareSeen = self.Target:getCurrentSquare()
 		
 		if(self.TargetSS) and (self.TargetSS:getBuilding()~= nil) then self.parent.TargetBuilding = self.TargetSS:getBuilding() end
+			-- set from 6 to 1.5
+			if(theDistance > 1.5) then 
+				self.parent:setRunning(true) 
+			else 
+				self.parent:setRunning(false)
+			end
 		
-		-- set from 6 to 3
-		if(theDistance > 3) then self.parent:setRunning(true) 
-		else self.parent:setRunning(false) end
-		
-		
-		self.parent:walkToDirect(self.Target:getCurrentSquare())
+			-- added to prevent movement spam | if not in front of a locked door, act as normal
+			if (not self.parent:inFrontOfLockedDoor()) then
+				self.parent:walkToDirect(self.Target:getCurrentSquare())
+			else
+			-- Else, if npc is in front of locked door, and walktoticks is 0, then do a movement and set the timer back
+			if (self.parent:inFrontOfLockedDoor()) and (self.parent.WalkToTicks <= 0) then
+				self.parent:walkToDirect(self.Target:getCurrentSquare())
+				self.parent.WalkToTicks = 15
+			end
+		end
 	end
-	
-	
-		
-	
-	
 end

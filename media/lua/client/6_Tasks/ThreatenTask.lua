@@ -119,14 +119,14 @@ function ThreatenTask:update()
 		
 	elseif(self.parent:isWalkingPermitted() or (not self.parent:inFrontOfLockedDoor())) then
 		
-	local cs = self.Aite.player:getCurrentSquare()
+		local cs = self.Aite.player:getCurrentSquare()
 		
-	self.parent:walkToDirect(cs)
+		self.parent:walkToDirect(cs)
 		
-	-- The new function to make NPCs actually run if they're too far away from their target
-	self.parent:NPC_MovementManagement()
+		-- The new function to make NPCs actually run if they're too far away from their target
+		self.parent:NPC_MovementManagement()
 		
-	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
+		self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
 	else
 		-- Attempted failsafe to make the NPC re-calculate the player. In this case it should be saying 'if npc is at locked door and not walkingpermitted, then do thing.
@@ -136,9 +136,10 @@ function ThreatenTask:update()
 			self.SquareAtThreat = self.Aite.player:getCurrentSquare()
 			local csa = self.SquareAtThreat
 			self.parent:walkTo(csa)
+			self.parent.WalkToTicks = 10
 		end
 		self.parent:DebugSay("ThreatenTask:update - something is wrong, attempting to fix. WalkToTicks = "..tostring(self.parent.WalkToTicks))
-		return false
+	--	return false
 	end
 	
 	
