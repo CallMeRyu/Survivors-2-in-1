@@ -56,15 +56,26 @@ function PursueTask:update()
 		
 		local distancetoLastSpotSeen = getDistanceBetween(self.LastSquareSeen,self.parent.player)
 		if(distancetoLastSpotSeen > 2.5) then
-		
-			self.parent:setRunning(true) 						
 			
-			self.parent:walkToDirect(self.LastSquareSeen)
+			-- Under the if is the previous version
+			if (not self.parent:inFrontOfLockedDoor()) and (not self.parent:inFrontOfBarricadedWindowAlt()) then
+				self.parent:setRunning(true) 						
+				
+				self.parent:walkToDirect(self.LastSquareSeen)
+				
+				if(ZombRand(4) == 0) and (self.parent:isSpeaking() == false) then
+					self.parent:Speak(getSpeech("SawHimThere"))
+				end
 			
-			if(ZombRand(4) == 0) and (self.parent:isSpeaking() == false) then
-				self.parent:Speak(getSpeech("SawHimThere"))
+			-- New code edits
+			else
+				if (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 10) then
+					local csa = getSpecificPlayer(0):getCurrentSquare()	
+					self.parent:walkTo(csa)
+				end
 			end
-			
+		
+		
 		else
 			self.parent:setRunning(false)
 			self.Complete = true

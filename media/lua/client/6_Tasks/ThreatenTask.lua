@@ -77,6 +77,9 @@ function ThreatenTask:update()
 	if(not self:isValid()) or (self:isComplete()) then return false end
 	 self.theDistance = getDistanceBetween(self.Aite, self.parent.player)
 	
+	-- Added this to stop threatening spam
+	if (self.theDistance >= 8 or self.parent:inFrontOfLockedDoor()) and (not self.parent.player:CanSee(self.Aite.player)) then return false end 
+	
 	if(self.StartedThreatening == true) then
 		if(self:dealBreaker()) then 			 
 			--self.parent.player:getModData().isRobber = false
@@ -117,17 +120,22 @@ function ThreatenTask:update()
 	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
 		
 	local cs = self.Aite.player:getCurrentSquare()
-	
+		
 	self.parent:walkToDirect(cs)
-	
+		
 	-- The new function to make NPCs actually run if they're too far away from their target
 	self.parent:NPC_MovementManagement()
-	
+		
 	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
 	else
-		self.parent:DebugSay("ThreatenTask:update - something is wrong")
-		return false
+		-- Attempted failsafe to make the NPC re-calculate the player. In this case it should be saying 'if npc is at locked door and not walkingpermitted, then do thing.
+		if (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 10) then
+			local csa = self.Aite.player:getCurrentSquare()
+			self.parent:walkTo(csa)
+		end
+		self.parent:DebugSay("ThreatenTask:update - something is wrong, attempting to fix")
+	--	return false
 	end
 	
 	
