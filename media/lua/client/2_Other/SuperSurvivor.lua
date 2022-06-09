@@ -18,7 +18,6 @@ function SuperSurvivor:new(isFemale,square)
 	o.GroupBraveryUpdatedTicks = 0
 	o.WaitTicks = 0
 	o.AtkTicks = 3
-	o.WalkToTicks = 0
 	o.TriggerHeldDown = false
 	o.player = o:spawnPlayer(square, isFemale)
 	o.userName = TextDrawObject.new()
@@ -142,7 +141,6 @@ function SuperSurvivor:newLoad(ID,square)
 	o.NumberOfBuildingsLooted = 0
 	o.WaitTicks = 0
 	o.AtkTicks = 3
-	o.WalkToTicks = 0
 	o.TriggerHeldDown = false
 	o.player = o:loadPlayer(square,ID)
 	o.userName = TextDrawObject.new()
@@ -230,7 +228,6 @@ function SuperSurvivor:newSet(player)
 	o.player = player
 	o.WaitTicks = 0
 	o.AtkTicks = 3
-	o.WalkToTicks = 0
 	o.LastSurvivorSeen = nil
 	o.LastMemberSeen = nil
 	o.TicksAtLastDetectNoFood = 0
@@ -1463,19 +1460,8 @@ function SuperSurvivor:walkTo(square)
 				self:DebugSay("little pig, little pig")
 		end
 		
-		-- New system to make the NPCs not spam themselves in the door infinitely
-		-- You can find the timer for self.WalkToTicks in the update() function
-		if (self.WalkToTicks <= 0) and (self:inFrontOfLockedDoor()) then
-			self:WalkToAttempt(square)
-			self.WalkToTicks = 15
-		else -- If not in front of a locked door
-			self:WalkToAttempt(square)
-			self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())		
-		end
-		
-		if (self.WalkToTicks > 0) then
-			self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
-		end
+		self:WalkToAttempt(square)
+		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
 	end
 	--]]
 end
@@ -1902,12 +1888,6 @@ end
 
 function SuperSurvivor:update()
 	
-	-- This should make the npcs not get stuck in front of doors now. Now that they literally can't walk to the door if the walktoticks is above 0
-	if (not self:inFrontOfLockedDoor()) and (self.WalkToTicks >= 1) then
-		self.WalkToTicks = self.WalkToTicks -1
-	end
-	
-	
 	if(self:isDead()) then 
 		
 		return false
@@ -1993,13 +1973,12 @@ function SuperSurvivor:update()
 			and (
 				self:getCurrentTask() == "None"
 				or self:getCurrentTask() == "Find This"
-				or self:getCurrentTask() == "Threaten"
 				or self:getCurrentTask() == "Find New Building"
 			)
 		) or (self:getCurrentTask() == "Pursue")
 	) then
 		print(self:getName().." Attempt Entry1")
-	--	self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
 		self.TicksSinceSquareChanged = 0
 	end
 	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring((self:inFrontOfWindow())))
@@ -2009,11 +1988,11 @@ function SuperSurvivor:update()
 		self.TicksSinceSquareChanged = 0
 	end
 	
-	if ((self.TicksSinceSquareChanged > 7) and (self:Get():getModData().bWalking == true)) or (self.TicksSinceSquareChanged > 50) then -- was 500
+	if ((self.TicksSinceSquareChanged > 7) and (self:Get():getModData().bWalking == true)) or (self.TicksSinceSquareChanged > 500) then
 		--print("detected survivor stuck walking: " .. self:getName() .. " for " .. self.TicksSinceSquareChanged .. " x" .. self.StuckCount)
 		self.StuckCount = self.StuckCount + 1
 	--elseif ((self.TicksSinceSquareChanged > 10) and (self:Get():getModData().bWalking == true)) then
-		if (self.StuckCount > 35) then -- was 100
+		if (self.StuckCount > 100) then
 			--print("trying to knock survivor out of frozen state: " .. self:getName());
 			self.StuckCount = 0
 			ISTimedActionQueue.add(ISGetHitFromBehindAction:new(self.player,getSpecificPlayer(0)))

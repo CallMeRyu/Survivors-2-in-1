@@ -49,7 +49,7 @@ function AIManager(TaskMangerIn)
 --		if(ASuperSurvivor:Get():getModData().isHostile) and (ASuperSurvivor:isSpeaking() == false) then ASuperSurvivor:Speak(getSpeech("GonnaGetYou")) end
 --		TaskMangerIn:AddToTop(PursueTask:new(ASuperSurvivor,ASuperSurvivor.LastEnemeySeen))
 --	end
-
+	
 
 	-- Surrender Task	
 	if(getSpecificPlayer(0) ~= nil) then
@@ -490,16 +490,11 @@ function AIManager(TaskMangerIn)
 	if(ASuperSurvivor:getAIMode() == "Random Solo") and (TaskMangerIn:getCurrentTask() ~= "Listen") and (TaskMangerIn:getCurrentTask() ~= "Take Gift") then -- solo random survivor AI flow	
 
 		if(TaskMangerIn:getCurrentTask() == "None") and (ASuperSurvivor.TargetBuilding ~= nil) and (not ASuperSurvivor:getBuildingExplored(ASuperSurvivor.TargetBuilding)) then
-			if (not ASuperSurvivor:inFrontOfLockedDoor()) and (ASuperSurvivor.WalkToTicks <= 0) then -- Loop prevention 
-				TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
-				ASuperSurvivor.WalkToTicks = 15 -- Loop spam prevention 
-			end
+			TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
 --		V backup just in case
---		elseif(TaskMangerIn:getCurrentTask() == "None") and ((not EnemyIsSurvivor) or (not ASuperSurvivor:isEnemyInRange(ASuperSurvivor.LastEnemeySeen)) )then
-		elseif(TaskMangerIn:getCurrentTask() == "None") then
-			if (not ASuperSurvivor:inFrontOfLockedDoor()) and (ASuperSurvivor.WalkToTicks <= 0) then -- Loop prevention 
-				TaskMangerIn:AddToTop(FindUnlootedBuildingTask:new(ASuperSurvivor))
-			end
+--		elseif(TaskMangerIn:getCurrentTask() == "None") then
+		elseif(TaskMangerIn:getCurrentTask() == "None") and ((not EnemyIsSurvivor) or (not ASuperSurvivor:isEnemyInRange(ASuperSurvivor.LastEnemeySeen)) )then
+			TaskMangerIn:AddToTop(FindUnlootedBuildingTask:new(ASuperSurvivor))
 		end
 		
 		if(ASuperSurvivor.TargetBuilding ~= nil) or (ASuperSurvivor:inUnLootedBuilding()) then
