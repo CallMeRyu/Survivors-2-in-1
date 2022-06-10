@@ -67,11 +67,15 @@ function PursueTask:update()
 					self.parent:Speak(getSpeech("SawHimThere"))
 				end
 			
-			-- New code edits
+		-- New code edits
+		-- Attempted failsafe to make the NPC re-calculate the player. In this case it should be saying 'if npc is at locked door and not walkingpermitted, then do thing.	
+		-- 0 would only happen if not in front of door. the walkto function checks for ifinfrontoflocked door, and forces it to 15
+		-- As a result, it will only check for player's active position every 15 ticks (roughly 7 seconds)
 			else
-				if (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 10) then
+				if (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 10) and (self.parent.WalkToTicks <= 0) then
 					local csa = getSpecificPlayer(0):getCurrentSquare()	
 					self.parent:walkTo(csa)
+					self.parent.WalkToTicks = 15
 				end
 			end
 		
