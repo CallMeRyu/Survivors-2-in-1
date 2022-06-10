@@ -104,7 +104,7 @@ function FindUnlootedBuildingTask:update()
 		
 		if not self.TargetSquare then -- wander
 			self.parent:DebugSay("no entry, wander")
-			self.parent:setSneaking(false) -- added
+			
 			self.TicksSinceReversedDir = self.TicksSinceReversedDir + 1
 			if not self.WanderDirection then self.WanderDirection = ZombRand(1,4) end
 			

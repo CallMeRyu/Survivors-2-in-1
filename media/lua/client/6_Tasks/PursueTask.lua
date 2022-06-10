@@ -56,30 +56,15 @@ function PursueTask:update()
 		
 		local distancetoLastSpotSeen = getDistanceBetween(self.LastSquareSeen,self.parent.player)
 		if(distancetoLastSpotSeen > 2.5) then
+		
+			self.parent:setRunning(true) 						
 			
-			-- Under the if is the previous version
-			if (not self.parent:inFrontOfLockedDoor()) and (not self.parent:inFrontOfBarricadedWindowAlt()) then
-				self.parent:setRunning(true) 						
-				
-				self.parent:walkToDirect(self.LastSquareSeen)
-				
-				if(ZombRand(4) == 0) and (self.parent:isSpeaking() == false) then
-					self.parent:Speak(getSpeech("SawHimThere"))
-				end
+			self.parent:walkToDirect(self.LastSquareSeen)
 			
-		-- New code edits
-		-- Attempted failsafe to make the NPC re-calculate the player. In this case it should be saying 'if npc is at locked door and not walkingpermitted, then do thing.	
-		-- 0 would only happen if not in front of door. the walkto function checks for ifinfrontoflocked door, and forces it to 15
-		-- As a result, it will only check for player's active position every 15 ticks (roughly 7 seconds)
-			else
-				if (getDistanceBetween(self.parent.player, getSpecificPlayer(0)) <= 10) and (self.parent.WalkToTicks <= 0) then
-					local csa = getSpecificPlayer(0):getCurrentSquare()	
-					self.parent:walkTo(csa)
-					self.parent.WalkToTicks = 15
-				end
+			if(ZombRand(4) == 0) and (self.parent:isSpeaking() == false) then
+				self.parent:Speak(getSpeech("SawHimThere"))
 			end
-		
-		
+			
 		else
 			self.parent:setRunning(false)
 			self.Complete = true
@@ -92,22 +77,17 @@ function PursueTask:update()
 		self.LastSquareSeen = self.Target:getCurrentSquare()
 		
 		if(self.TargetSS) and (self.TargetSS:getBuilding()~= nil) then self.parent.TargetBuilding = self.TargetSS:getBuilding() end
-			-- set from 6 to 1.5
-			if(theDistance > 1.5) then 
-				self.parent:setRunning(true) 
-			else 
-				self.parent:setRunning(false)
-			end
 		
-			-- added to prevent movement spam | if not in front of a locked door, act as normal
-			if (not self.parent:inFrontOfLockedDoor()) then
-				self.parent:walkToDirect(self.Target:getCurrentSquare())
-			else
-			-- Else, if npc is in front of locked door, and walktoticks is 0, then do a movement and set the timer back
-			if (self.parent:inFrontOfLockedDoor()) and (self.parent.WalkToTicks <= 0) then
-				self.parent:walkToDirect(self.Target:getCurrentSquare())
-				self.parent.WalkToTicks = 15
-			end
-		end
+		-- set from 6 to 3
+		if(theDistance > 3) then self.parent:setRunning(true) 
+		else self.parent:setRunning(false) end
+		
+		
+		self.parent:walkToDirect(self.Target:getCurrentSquare())
 	end
+	
+	
+		
+	
+	
 end

@@ -40,7 +40,7 @@ function AttackTask:update()
 		local sq = getFleeSquare(self.parent.player,self.parent.LastEnemeySeen)
 		self.parent:walkToDirect(sq)
 		self.parent:DebugSay("backing away cuz i got gun" )
-	--	elseif(self.parent.player:IsAttackRange(self.parent.LastEnemeySeen:getX(),self.parent.LastEnemeySeen:getY(),self.parent.LastEnemeySeen:getZ())) then -- or (theDistance < 0.65 )then
+--	elseif(self.parent.player:IsAttackRange(self.parent.LastEnemeySeen:getX(),self.parent.LastEnemeySeen:getY(),self.parent.LastEnemeySeen:getZ())) then -- or (theDistance < 0.65 )then
 	elseif(theDistance <= minrange ) then -- or (theDistance < 0.65 )then
 			--print(self.parent:getName().. " int attack range !" )
 			local weapon = self.parent.player:getPrimaryHandItem()
@@ -59,8 +59,21 @@ function AttackTask:update()
 			--if(self.parent:usingGun()) then self.parent.Reducer = 0 end -- force delay when using gun
 		
 	elseif(self.parent:isWalkingPermitted()) then
-		-- This is found in SuperSurvivors lua. The code was so good, it was taken out of this file and made a function out of it.
+	
 		self.parent:NPC_MovementManagement()
+	
+--		local cs = self.parent.LastEnemeySeen:getCurrentSquare()
+--		if(instanceof(self.parent.LastEnemeySeen,"IsoPlayer")) then
+--		self.parent:walkToDirect(cs)
+--		else
+--			local fs = cs:getTileInDirection(self.parent.LastEnemeySeen:getDir())
+--			if(fs) and (fs:isFree(true)) then
+--				self.parent:walkToDirect(fs)
+--			else 
+--				self.parent:walkToDirect(cs)
+--			end
+--		end
+			
 		self.parent:DebugSay("walking close to attack:"..tostring(theDistance))
 	else
 		self.parent:DebugSay("something is wrong")
