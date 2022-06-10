@@ -73,6 +73,7 @@ function AttemptEntryIntoBuildingTask:update()
 		self.parent:MarkBuildingExplored(self.parent:getBuilding())
 		self.TargetSquare = nil
 		self.parent:walkToDirect(outsidesquare)
+		self.parent:walkTo(outsidesquare)
 	--	self.TryWindow = true
 	end
 	if (self.parent:inFrontOfBarricadedWindowAlt()) then 
@@ -101,7 +102,7 @@ function AttemptEntryIntoBuildingTask:update()
 		
 			local door = self.parent:inFrontOfDoor()
 			
-			if self.TryWindow == false and (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded())  then
+			if self.TryWindow == false and (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed())  then
 				--if (not self.parent:isTargetBuildingClaimed(self.parent.TargetBuilding)) then
 				--	-- little pig, little pig
 				--	door:setIsLocked(false)
@@ -122,6 +123,8 @@ function AttemptEntryIntoBuildingTask:update()
 				if(self.parent:getWalkToAttempt(self.TargetSquare) < 10) then
 					if(debugOutput) then print( self.parent:getName() .. " " .."trying to get to square inside") end
 				if(debugOutput) then 	self.parent:Speak(tostring(self.parent:getWalkToAttempt(self.TargetSquare))) end
+					--self.parent:walkTo(self.TargetSquare)
+					self.parent:walkToDirect(self.TargetSquare) -- If this doesn't work, use the other
 					self.parent:walkTo(self.TargetSquare)
 					self.parent:Speak("Trying Window!")
 				else

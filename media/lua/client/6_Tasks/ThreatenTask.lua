@@ -119,6 +119,7 @@ function ThreatenTask:update()
 	local cs = self.Aite.player:getCurrentSquare()
 	
 	self.parent:walkToDirect(cs)
+	self.parent:setRunning(true) -- Newly added
 	
 	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))

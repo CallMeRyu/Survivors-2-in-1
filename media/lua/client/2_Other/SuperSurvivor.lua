@@ -1432,7 +1432,7 @@ function SuperSurvivor:isWalking()
 		
 end
 
-
+-- WalkToDirect, try that instead
 function SuperSurvivor:walkTo(square)
 
 
@@ -1454,15 +1454,14 @@ function SuperSurvivor:walkTo(square)
 	end
 	if adjacent ~= nil then
 		local door = self:inFrontOfDoor()
-		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) then
+		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
 		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-			-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			--self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 		end
 	end
 		
@@ -1551,7 +1550,7 @@ function SuperSurvivor:inFrontOfLockedDoor()
 
 	local door = self:inFrontOfDoor()
 			
-	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded())  then
+	if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed())  then
 		return true
 	else 
 		return false
@@ -2033,10 +2032,9 @@ function SuperSurvivor:update()
 	if( self.GoFindThisCounter > 0 ) then self.GoFindThisCounter = self.GoFindThisCounter -1 end
 	
 		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-			-- self:getTaskManager():AddToTop(FindBuildingTask:new(self))
 			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+		--	self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+		--	self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 		end
 	
 end
