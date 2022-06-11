@@ -103,17 +103,25 @@ function FindUnlootedBuildingTask:update()
 		end
 		
 		if not self.TargetSquare then -- wander
-			self.parent:DebugSay("no entry, wander")
-			
-			self.TicksSinceReversedDir = self.TicksSinceReversedDir + 1
+			self.parent:DebugSay("no entry, wander, TicksSinceReversedDir:"..tostring(self.TicksSinceReversedDir))
+			if (self.TicksSinceReversedDir < 17) then
+				self.TicksSinceReversedDir = self.TicksSinceReversedDir + 1
+			end
+
 			if not self.WanderDirection then self.WanderDirection = ZombRand(1,4) end
+	
+			if (self.TicksSinceReversedDir > 20) then -- Meaning just stop movement entirely, so it doesn't lag
+				self.parent:StopWalk()
+				self.parent:getTaskManager():clear()
+				return false
+			end
 			
 			if (self.parent.player:getCurrentSquare()) and (self.parent.player:getCurrentSquare():getZoneType() ~= "TownZone") and (self.TicksSinceReversedDir > 10) then -- reverse direction
-				self.TicksSinceReversedDir = 0
+				--self.TicksSinceReversedDir = 0
 				if(self.WanderDirection == 1) then self.WanderDirection = 2 
 				elseif(self.WanderDirection == 2) then self.WanderDirection = 1 
 				elseif(self.WanderDirection == 3) then self.WanderDirection = 4 
-				elseif(self.WanderDirection == 4) then self.WanderDirection = 3 end
+				elseif(self.WanderDirection == 4) then self.WanderDirection = 3 end	
 			end
 			
 			local xoff = 0

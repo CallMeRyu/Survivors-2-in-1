@@ -1457,7 +1457,7 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) then
+		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) and (self:NPC_IsOutside() == true) then
 			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
 
 			if (self.TicksSinceSquareChanged > 10) then
@@ -1477,14 +1477,11 @@ end
 
 function SuperSurvivor:walkTowards(x,y,z)
 
-
-	
 	local towardsSquare = getTowardsSquare(self:Get(),x,y,z)
 	if(towardsSquare == nil) then return false end
 	
 	self:WalkToPoint(towardsSquare:getX(),towardsSquare:getY(),towardsSquare:getZ())
-	
-	
+
 end
 
 function SuperSurvivor:setHostile(toValue)
@@ -2006,74 +2003,14 @@ function SuperSurvivor:update()
 	end
 
 
---	local cs = self.player:getCurrentSquare()
---	if(cs ~= nil) then
---		if(self.LastSquare == nil) or (self.LastSquare ~= cs) then
---			self.TicksSinceSquareChanged = 0
---			self.LastSquare = cs
---		elseif (self.LastSquare == cs) then
---			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
---			--self:Speak(tostring(self.TicksSinceSquareChanged))
---		end
---	end
---	
---	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring(self:inFrontOfLockedDoor()) ..",".. tostring(self:getTaskManager():getCurrentTask() ~= "Enter New Building") ..",".. tostring(self.TargetBuilding ~= nil))
---	--print( self:getName()..": "..tostring((self.TargetBuilding ~= nil)))
---	if (
---		(self:inFrontOfLockedDoor())
---		or
---		(self:inFrontOfWindow())
---	) and (
---		self:getTaskManager():getCurrentTask() ~= "Enter New Building"
---	) and (
---		self.TargetBuilding ~= nil
---	) and (
---		(
---			(self.TicksSinceSquareChanged > 6)
---			and (self:isInAction() == false)
---			and (
---				self:getCurrentTask() == "None"
---				or self:getCurrentTask() == "Find This"
---				or self:getCurrentTask() == "Find New Building"
---			)
---		) or (self:getCurrentTask() == "Pursue")
---	) then
---		print(self:getName().." Attempt Entry1")
---		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
---		self.TicksSinceSquareChanged = 0
---	end
---	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring((self:inFrontOfWindow())))
---	
---	if (self.TicksSinceSquareChanged > 9) and (self:isInAction() == false) and (self:inFrontOfWindow()) and (self:getCurrentTask() ~= "Enter New Building") then
---		self.player:climbThroughWindow(self:inFrontOfWindow())
---		self.TicksSinceSquareChanged = 0
---	end
---	
---	if ((self.TicksSinceSquareChanged > 7) and (self:Get():getModData().bWalking == true)) or (self.TicksSinceSquareChanged > 500) then
---		--print("detected survivor stuck walking: " .. self:getName() .. " for " .. self.TicksSinceSquareChanged .. " x" .. self.StuckCount)
---		self.StuckCount = self.StuckCount + 1
---	--elseif ((self.TicksSinceSquareChanged > 10) and (self:Get():getModData().bWalking == true)) then
---		if (self.StuckCount > 100) then
---			--print("trying to knock survivor out of frozen state: " .. self:getName());
---			self.StuckCount = 0
---			ISTimedActionQueue.add(ISGetHitFromBehindAction:new(self.player,getSpecificPlayer(0)))
---		else
---			local xoff = self.player:getX() + ZombRand(-3,3)
---			local yoff = self.player:getY() + ZombRand(-3,3)		
---			self:StopWalk()
---			self:WalkToPoint(xoff,yoff,self.player:getZ())
---			self:Wait(2)
---		end
---	end
-
-	self:CheckForIfStuck()
+	self:ManageIndoorStuck()
+	self:ManageOutdoorStuck()
+	self:CheckForIfStuck() -- New function to cleanup the update() function
 	self:NPCcalculateWalkSpeed()
-	
 	self:DoVision()
-	--self:Speak(tostring(self:isInBase()))
-	
 	self.MyTaskManager:update()
-	
+
+	--self:Speak(tostring(self:isInBase()))	
 	if(self.Reducer % 480 == 0) then 
 		if(DebugMode) then print(self:getName().." task:"..MyTaskManager:getCurrentTask()) end
 		self:setSneaking(false)
@@ -2101,24 +2038,39 @@ function SuperSurvivor:update()
 	
 	if( self.GoFindThisCounter > 0 ) then self.GoFindThisCounter = self.GoFindThisCounter -1 end
 
-		-- Todo : remove these lines to test
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) and (self:NPC_IsOutside()) then
-			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
 
-			if (self.TicksSinceSquareChanged > 10) then
-				self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-				self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-				self.TicksSinceSquareChanged = 0
-			end
-		--else
-		--	self:getTaskManager():clear()
-		--	self:getTaskManager():AddToTop(LockDoorsTask:new(self,false))
-		--	self.TicksSinceSquareChanged = 0
-		end
 end
 
+function SuperSurvivor:ManageOutdoorStuck()
+	-- Todo : remove these lines to test
+	if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) and (self:NPC_IsOutside()) and (self:getTaskManager():getCurrentTask() ~= "Wander") then
+		self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
+
+		if (self.TicksSinceSquareChanged > 10) then
+			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			self:getTaskManager():AddToTop(WanderTask:new(self))
+			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			self:getTaskManager():AddToTop(WanderTask:new(self))
+			self.TicksSinceSquareChanged = 0
+		end		
+	end	
+end
+	
+function SuperSurvivor:ManageIndoorStuck()
+	if (self:inFrontOfLockedDoor()) and (self:NPC_IsOutside() == false) and (self:getTaskManager():getCurrentTask() ~= "Wander") then
+	self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
+	
+		if (self.TicksSinceSquareChanged > 10) then
+			self:StopWalk()
+			self:getTaskManager():clear()
+			self:getTaskManager():AddToTop(WanderTask:new(self))
+			self.TicksSinceSquareChanged = 0
+		end
+	end
+
+end
 
 function SuperSurvivor:OnDeath()
 	print(self:getName() .. " has died")
