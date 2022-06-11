@@ -1457,17 +1457,17 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
---		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) then
---			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
---
---			if (self.TicksSinceSquareChanged > 10) then
---				self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
---				self:getTaskManager():AddToTop(FindBuildingTask:new(self))
---				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
---				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
---				self.TicksSinceSquareChanged = 0
---			end
---		end
+		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) then
+			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
+
+			if (self.TicksSinceSquareChanged > 10) then
+				self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+				self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				self.TicksSinceSquareChanged = 0
+			end
+		end
 	end
 		self:WalkToAttempt(square)
 		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
@@ -2065,6 +2065,7 @@ function SuperSurvivor:update()
 --			self:Wait(2)
 --		end
 --	end
+
 	self:CheckForIfStuck()
 	self:NPCcalculateWalkSpeed()
 	
@@ -2116,7 +2117,6 @@ function SuperSurvivor:update()
 		--	self:getTaskManager():AddToTop(LockDoorsTask:new(self,false))
 		--	self.TicksSinceSquareChanged = 0
 		end
-
 end
 
 
@@ -2919,8 +2919,8 @@ function SuperSurvivor:NPC_MovementManagement()
 		-- Sprinting Calculation while also checking distance > minrange 
 		if (RealDistance >= minrange + 1.25) and (self:getTaskManager():getCurrentTask() == "Attack") and (self:getTaskManager():getCurrentTask() ~= "Pursue") then
 			self:setRunning(true)
-			self:getTaskManager():AddToTop(PursueTask:new(self, self.LastEnemeySeen))			
-			self:DebugSay("MovementManagement: Task changed")
+			--self:getTaskManager():AddToTop(PursueTask:new(self, self.LastEnemeySeen))			
+			--self:DebugSay("MovementManagement: Task changed")
 		else
 			self:setRunning(false)
 		end

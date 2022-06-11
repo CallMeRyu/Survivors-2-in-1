@@ -105,11 +105,13 @@ function AIManager(TaskMangerIn)
 		TaskMangerIn:AddToTop(FirstAideTask:new(ASuperSurvivor))
 	end
 	-- flee from too many zombies
-	if (TaskMangerIn:getCurrentTask() ~= "Flee") and ((TaskMangerIn:getCurrentTask() ~= "Surender") and not EnemyIsSurvivor) and (ASuperSurvivor:getDangerSeenCount() > 0) and ((ASuperSurvivor:isTooScaredToFight()) or (not ASuperSurvivor:hasWeapon() and ASuperSurvivor:getDangerSeenCount() > 1) or (IHaveInjury and ASuperSurvivor:getDangerSeenCount() > 0) or (EnemyIsSurvivorHasGun and ASuperSurvivor:hasGun() == false) ) then
+	if (TaskMangerIn:getCurrentTask() ~= "Flee") and (TaskMangerIn:getCurrentTask() ~= "Surender") and ((TaskMangerIn:getCurrentTask() ~= "Surender") and not EnemyIsSurvivor) and (ASuperSurvivor:getDangerSeenCount() > 0) and ( (ASuperSurvivor:isTooScaredToFight()) or (not ASuperSurvivor:hasWeapon() and ASuperSurvivor:getDangerSeenCount() > 1) or (IHaveInjury and ASuperSurvivor:getDangerSeenCount() > 0) or (EnemyIsSurvivorHasGun and ASuperSurvivor:hasGun() == false) ) then
 		if(TaskMangerIn:getCurrentTask() == "LootCategoryTask") then -- currently to dangerous to loot said building. so give up it
 			TaskMangerIn:getTask():ForceFinish()
 		end
+		ASuperSurvivor:getTaskManager():clear()
 		TaskMangerIn:AddToTop(FleeTask:new(ASuperSurvivor))
+		TaskMangerIn:AddToTop(FleeFromHereTask:new(ASuperSurvivor,ASuperSurvivor:Get():getCurrentSquare()))
 	end
 	-- eat food on person or go find food in building if in building
 	if (false) and (ASuperSurvivor:getAIMode() ~= "Random Solo") and ((ASuperSurvivor:isStarving()) or (ASuperSurvivor:isDyingOfThirst())) then  -- leave group and look for food if starving
@@ -518,7 +520,7 @@ function AIManager(TaskMangerIn)
 			(TaskMangerIn:getCurrentTask() ~= "Enter New Building") and -- new
 			(TaskMangerIn:getCurrentTask() ~= "Barricade Building") and 
 			(ASuperSurvivor:hasWeapon())  and 
-			(not ASuperSurvivor:isInSameBuildingWithEnemyAlt())  and -- That way npc doesn't stop what they're doing moment they look away from a hostile
+			(ASuperSurvivor:isInSameBuildingWithEnemyAlt() == false)  and -- That way npc doesn't stop what they're doing moment they look away from a hostile
 			(ASuperSurvivor:hasFood()) 
 		then
 
