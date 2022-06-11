@@ -507,7 +507,21 @@ function AIManager(TaskMangerIn)
 				TaskMangerIn:AddToTop(LootCategoryTask:new(ASuperSurvivor,ASuperSurvivor.TargetBuilding,"Food",1))
 			end
 		end
-		if (SurvivorBases) and (ASuperSurvivor:getBaseBuilding() == nil) and (ASuperSurvivor:getBuilding()) and (TaskMangerIn:getCurrentTask() ~= "First Aide") and (TaskMangerIn:getCurrentTask() ~= "Attack") and (TaskMangerIn:getCurrentTask() ~= "Barricade Building") and (ASuperSurvivor:hasWeapon())  and (ASuperSurvivor:hasFood()) then
+		if (SurvivorBases) and 
+		    (IsInAction == false) and 									-- New. Hopefully to stop spam
+			(ASuperSurvivor:getBaseBuilding() == nil) and 
+			(ASuperSurvivor:getBuilding()) and 
+			(TaskMangerIn:getCurrentTask() ~= "First Aide") and 
+			(TaskMangerIn:getCurrentTask() ~= "Attack") and 
+			(TaskMangerIn:getCurrentTask() ~= "Threaten") and			-- new
+			(TaskMangerIn:getCurrentTask() ~= "Pursue") and				-- new
+			(TaskMangerIn:getCurrentTask() ~= "Enter New Building") and -- new
+			(TaskMangerIn:getCurrentTask() ~= "Barricade Building") and 
+			(ASuperSurvivor:hasWeapon())  and 
+			(not ASuperSurvivor:isInSameBuildingWithEnemyAlt())  and -- That way npc doesn't stop what they're doing moment they look away from a hostile
+			(ASuperSurvivor:hasFood()) 
+		then
+
 			TaskMangerIn:clear()
 			ASuperSurvivor:setBaseBuilding(ASuperSurvivor:getBuilding())
 			TaskMangerIn:AddToTop(WanderInBuildingTask:new(ASuperSurvivor,ASuperSurvivor:getBuilding()))

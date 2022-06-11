@@ -69,14 +69,17 @@ function AttemptEntryIntoBuildingTask:update()
 
 	
 	if (self.parent:inFrontOfLockedDoor()) then
+		self.parent.TicksSinceSquareChanged = self.parent.TicksSinceSquareChanged + 1
 		self.parent:Speak("Damnit, the door is blocked off!")
 		self.parent:MarkBuildingExplored(self.parent:getBuilding())
 		self.TargetSquare = nil
 		self.parent:walkToDirect(outsidesquare)
 		self.parent:walkTo(outsidesquare)
 	--	self.TryWindow = true
+	else
+		self.parent.TicksSinceSquareChanged = 0
 	end
-	if (self.parent:inFrontOfBarricadedWindowAlt()) then 
+	if (self.parent:inFrontOfBarricadedWindowAlt()) and (self.Door ~= nil) then 
 		self.parent:Speak("Windows are blocked too! Well, there's no point in staying here...")
 		self.parent:MarkBuildingExplored(self.parent:getBuilding())
 		self.TargetSquare = nil
@@ -84,6 +87,12 @@ function AttemptEntryIntoBuildingTask:update()
 		self.parent:walkTo(outsidesquare)
 	--	self:giveUpOnBuilding() 
 	end
+
+	if (self.parent.TicksSinceSquareChanged > 10) and ((self.parent:inFrontOfBarricadedWindowAlt()) or (self.parent:inFrontOfLockedDoor())) then
+		self:giveUpOnBuilding()
+		return false
+	end
+
 	-- Let the rest of the code do whatever, but make it where if the window is at least barricaded, 
 	-- then make it where the npc actually gives up raiding. Otherwise, the npc will break window like normal. 
 	-- But now ^ that code above manages most of the work. 

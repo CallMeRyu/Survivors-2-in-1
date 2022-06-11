@@ -1457,14 +1457,18 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-			--self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-		end
+--		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) then
+--			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
+--
+--			if (self.TicksSinceSquareChanged > 10) then
+--				self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+--				self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+--				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+--				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+--				self.TicksSinceSquareChanged = 0
+--			end
+--		end
 	end
-		
 		self:WalkToAttempt(square)
 		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
 	end
@@ -1878,65 +1882,8 @@ function SuperSurvivor:NPCcalculateWalkSpeed()
 	self.player:setVariable("WalkSpeed", wmin * 0.8);
 end
 
-function SuperSurvivor:update()
-	
-	if(self:isDead()) then 
-		
-		return false
-	
-	end
-	
-	self.player:setBlockMovement(true)
-	
-	--self:CleanUp(0.988); -- slowly reduces current blood/dirt by this percent 
-	
-	self.TriggerHeldDown = false
-	if(not SurvivorHunger) then		
-		self.player:getStats():setThirst(0.0)
-		self.player:getStats():setHunger(0.0)	
-	--else
-		--self.player:getStats():setThirst(self.player:getStats():getThirst() + 0.00005) -- survivor thirst does not move so manually incremnt it
-	elseif (not self:isInBase()) then
-		-- dont get hungry outside of base, to prevent infinite search loops
-		--self.player:getStats():setThirst(0.0)
-		--self.player:getStats():setHunger(0.0)	
-	end
-	
-	--control of unmanaged stats
-	self.player:getNutrition():setWeight(85);
-	self.player:getBodyDamage():setSneezeCoughActive(0);	
-	self.player:getBodyDamage():setFoodSicknessLevel(0);	
-	self.player:getBodyDamage():setPoisonLevel(0);	
-	self.player:getBodyDamage():setUnhappynessLevel(0);		
-	self.player:getBodyDamage():setHasACold(false);		
-	self.player:getStats():setFatigue(0.0);	
-	self.player:getStats():setIdleboredom(0.0);
-	self.player:getStats():setMorale(0.5);
-	self.player:getStats():setStress(0.0);
-	self.player:getStats():setSanity(1);
-	--print("health" .. self.player:getHealth());
-	
-	if (not SurvivorsFindWorkThemselves) then
-		self.player:getStats():setBoredom(0.0);
-	end
-	if (not RainManager.isRaining()) or (not self.player:isOutside()) then
-		self.player:getBodyDamage():setWetness(self.player:getBodyDamage():getWetness() - 0.1);
-	end
-	
-	if(self.player:isOnFire()) then 
-		self.player:getBodyDamage():RestoreToFullHealth() -- temporarily give some fireproofing as they walk right through fire via pathfinding
-		self.player:setFireSpreadProbability(0); -- give some fireproofing as they walk right through fire via pathfinding	
-	end
-	
 
-	if (self.TargetSquare ~= nil and self.TargetSquare:getZ() ~= self.player:getZ() and getGameSpeed() > 2) then
-		print("DANGER ZONE 2: " .. self:getName());
-		self.TargetSquare = nil
-		self:StopWalk()
-		self:Wait(10)
-	end
-
-
+function SuperSurvivor:CheckForIfStuck()
 	local cs = self.player:getCurrentSquare()
 	if(cs ~= nil) then
 		if(self.LastSquare == nil) or (self.LastSquare ~= cs) then
@@ -1996,7 +1943,129 @@ function SuperSurvivor:update()
 			self:Wait(2)
 		end
 	end
+	
+end
+
+
+function SuperSurvivor:update()
+	
+	if(self:isDead()) then 
 		
+		return false
+	
+	end
+	
+	self.player:setBlockMovement(true)
+	
+	--self:CleanUp(0.988); -- slowly reduces current blood/dirt by this percent 
+	
+	self.TriggerHeldDown = false
+	if(not SurvivorHunger) then		
+		self.player:getStats():setThirst(0.0)
+		self.player:getStats():setHunger(0.0)	
+	--else
+		--self.player:getStats():setThirst(self.player:getStats():getThirst() + 0.00005) -- survivor thirst does not move so manually incremnt it
+	elseif (not self:isInBase()) then
+		-- dont get hungry outside of base, to prevent infinite search loops
+		--self.player:getStats():setThirst(0.0)
+		--self.player:getStats():setHunger(0.0)	
+	end
+	
+	--control of unmanaged stats
+	self.player:getNutrition():setWeight(85);
+	self.player:getBodyDamage():setSneezeCoughActive(0);	
+	self.player:getBodyDamage():setFoodSicknessLevel(0);	
+	self.player:getBodyDamage():setPoisonLevel(0);	
+	self.player:getBodyDamage():setUnhappynessLevel(0);		
+	self.player:getBodyDamage():setHasACold(false);		
+	self.player:getStats():setFatigue(0.0);	
+	self.player:getStats():setIdleboredom(0.0);
+	self.player:getStats():setMorale(0.5);
+	self.player:getStats():setStress(0.0);
+	self.player:getStats():setSanity(1);
+	--print("health" .. self.player:getHealth());
+	
+	if (not SurvivorsFindWorkThemselves) then
+		self.player:getStats():setBoredom(0.0);
+	end
+	if (not RainManager.isRaining()) or (not self.player:isOutside()) then
+		self.player:getBodyDamage():setWetness(self.player:getBodyDamage():getWetness() - 0.1);
+	end
+	
+	if(self.player:isOnFire()) then 
+		self.player:getBodyDamage():RestoreToFullHealth() -- temporarily give some fireproofing as they walk right through fire via pathfinding
+		self.player:setFireSpreadProbability(0); -- give some fireproofing as they walk right through fire via pathfinding	
+	end
+	
+
+	if (self.TargetSquare ~= nil and self.TargetSquare:getZ() ~= self.player:getZ() and getGameSpeed() > 2) then
+		self:DebugSay("DANGER ZONE 2: " .. self:getName());
+		self.TargetSquare = nil
+		self:StopWalk()
+		self:Wait(10)
+	end
+
+
+--	local cs = self.player:getCurrentSquare()
+--	if(cs ~= nil) then
+--		if(self.LastSquare == nil) or (self.LastSquare ~= cs) then
+--			self.TicksSinceSquareChanged = 0
+--			self.LastSquare = cs
+--		elseif (self.LastSquare == cs) then
+--			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
+--			--self:Speak(tostring(self.TicksSinceSquareChanged))
+--		end
+--	end
+--	
+--	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring(self:inFrontOfLockedDoor()) ..",".. tostring(self:getTaskManager():getCurrentTask() ~= "Enter New Building") ..",".. tostring(self.TargetBuilding ~= nil))
+--	--print( self:getName()..": "..tostring((self.TargetBuilding ~= nil)))
+--	if (
+--		(self:inFrontOfLockedDoor())
+--		or
+--		(self:inFrontOfWindow())
+--	) and (
+--		self:getTaskManager():getCurrentTask() ~= "Enter New Building"
+--	) and (
+--		self.TargetBuilding ~= nil
+--	) and (
+--		(
+--			(self.TicksSinceSquareChanged > 6)
+--			and (self:isInAction() == false)
+--			and (
+--				self:getCurrentTask() == "None"
+--				or self:getCurrentTask() == "Find This"
+--				or self:getCurrentTask() == "Find New Building"
+--			)
+--		) or (self:getCurrentTask() == "Pursue")
+--	) then
+--		print(self:getName().." Attempt Entry1")
+--		self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+--		self.TicksSinceSquareChanged = 0
+--	end
+--	--self.player:Say(tostring(self:isInAction()) ..",".. tostring(self.TicksSinceSquareChanged > 6) ..",".. tostring((self:inFrontOfWindow())))
+--	
+--	if (self.TicksSinceSquareChanged > 9) and (self:isInAction() == false) and (self:inFrontOfWindow()) and (self:getCurrentTask() ~= "Enter New Building") then
+--		self.player:climbThroughWindow(self:inFrontOfWindow())
+--		self.TicksSinceSquareChanged = 0
+--	end
+--	
+--	if ((self.TicksSinceSquareChanged > 7) and (self:Get():getModData().bWalking == true)) or (self.TicksSinceSquareChanged > 500) then
+--		--print("detected survivor stuck walking: " .. self:getName() .. " for " .. self.TicksSinceSquareChanged .. " x" .. self.StuckCount)
+--		self.StuckCount = self.StuckCount + 1
+--	--elseif ((self.TicksSinceSquareChanged > 10) and (self:Get():getModData().bWalking == true)) then
+--		if (self.StuckCount > 100) then
+--			--print("trying to knock survivor out of frozen state: " .. self:getName());
+--			self.StuckCount = 0
+--			ISTimedActionQueue.add(ISGetHitFromBehindAction:new(self.player,getSpecificPlayer(0)))
+--		else
+--			local xoff = self.player:getX() + ZombRand(-3,3)
+--			local yoff = self.player:getY() + ZombRand(-3,3)		
+--			self:StopWalk()
+--			self:WalkToPoint(xoff,yoff,self.player:getZ())
+--			self:Wait(2)
+--		end
+--	end
+	self:CheckForIfStuck()
 	self:NPCcalculateWalkSpeed()
 	
 	self:DoVision()
@@ -2030,13 +2099,24 @@ function SuperSurvivor:update()
 	else self:SaveSurvivorOnMap() end
 	
 	if( self.GoFindThisCounter > 0 ) then self.GoFindThisCounter = self.GoFindThisCounter -1 end
-	
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
-			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-		--	self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-		--	self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+
+		-- Todo : remove these lines to test
+		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) and (self:NPC_IsOutside()) then
+			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
+
+			if (self.TicksSinceSquareChanged > 10) then
+				self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+				self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				self.TicksSinceSquareChanged = 0
+			end
+		--else
+		--	self:getTaskManager():clear()
+		--	self:getTaskManager():AddToTop(LockDoorsTask:new(self,false))
+		--	self.TicksSinceSquareChanged = 0
 		end
-	
+
 end
 
 
