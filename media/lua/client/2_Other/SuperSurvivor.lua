@@ -1432,13 +1432,6 @@ function SuperSurvivor:isWalking()
 		
 end
 
-
--- New function, idealy should be smarter
-function SuperSurvivor:NPC_Walk()
-
-end
-
-
 -- WalkToDirect, try that instead
 function SuperSurvivor:walkTo(square)
 
@@ -1463,8 +1456,14 @@ function SuperSurvivor:walkTo(square)
 		local door = self:inFrontOfDoor()
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed()) then
 			local building = door:getOppositeSquare():getBuilding()
-			self:DebugSay(tostring(self:getName()).." (Door status - IsLocked: "..tostring(door:isLocked())..") (IsLockedByKey: "..tostring(door:isLockedByKey())..") (IsBarricaded: "..tostring(door:isBarricaded())..") (IsDestroyed: "..tostring(door:isDestroyed())..") IsOpen: "..tostring(door:IsOpen()) )
+				self:DebugSay("little pig, little pig")
+		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) then
+			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+			--self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 		end
+	end
 		
 		self:WalkToAttempt(square)
 		self:WalkToPoint(adjacent:getX(),adjacent:getY(),adjacent:getZ())
@@ -1484,28 +1483,6 @@ function SuperSurvivor:walkTowards(x,y,z)
 	
 end
 
-function SuperSurvivor:walkToDirect(square)
-
-	if(square == nil) then return false end
-	
-	self:WalkToAttempt(square)
-	self:WalkToPoint(square:getX(),square:getY(),square:getZ())
-	
-end
-
-function SuperSurvivor:WalkToPoint(tx, ty, tz) 
-
-    if(not self.player:getPathFindBehavior2():isTargetLocation(tx,ty,tz)) then
-	
-        self.player:getModData().bWalking = true
-		
-        self.player:setPath2(nil);
-        self.player:getPathFindBehavior2():pathToLocation(tx,ty,tz);
-		if(self.DebugMode) then print(self:getName() .. " WalkToPoint") end
-    end
-        
-  end
-
 function SuperSurvivor:setHostile(toValue)
 	if(toValue) then
 		self.userName:setDefaultColors(128,128, 128, 255);
@@ -1519,6 +1496,29 @@ function SuperSurvivor:setHostile(toValue)
 		self.player:getModData().isRobber = true
 	end
 end
+
+function SuperSurvivor:walkToDirect(square)
+
+	if(square == nil) then return false end
+	
+	self:WalkToAttempt(square)
+	self:WalkToPoint(square:getX(),square:getY(),square:getZ())
+	
+end
+
+ 
+function SuperSurvivor:WalkToPoint(tx, ty, tz) 
+
+    if(not self.player:getPathFindBehavior2():isTargetLocation(tx,ty,tz)) then
+	
+        self.player:getModData().bWalking = true
+		
+        self.player:setPath2(nil);
+        self.player:getPathFindBehavior2():pathToLocation(tx,ty,tz);
+		if(self.DebugMode) then print(self:getName() .. " WalkToPoint") end
+    end
+        
+  end
 
 function SuperSurvivor:NPC_IsOutside()
 	if self.player:isOutside() then
@@ -1965,7 +1965,6 @@ function SuperSurvivor:update()
 			and (
 				self:getCurrentTask() == "None"
 				or self:getCurrentTask() == "Find This"
-				or self:getCurrentTask() == "ThreatenTask" -- Added, something goes wrong? Remove it
 				or self:getCurrentTask() == "Find New Building"
 			)
 		) or (self:getCurrentTask() == "Pursue")
@@ -2072,7 +2071,7 @@ function SuperSurvivor:PlayerUpdate()
 		if(self.TriggerHeldDown) and (self:CanAttackAlt()) then -- simulate automatic weapon fire
 			self:NPC_Attack(self.LastEnemeySeen)
 		end
-		-- This code is to check for closed doors, and to close them?
+		
 		if(self.player:getLastSquare() ~= nil ) then
 			local cs = self.player:getCurrentSquare()
 			local ls = self.player:getLastSquare()
@@ -2905,7 +2904,7 @@ function SuperSurvivor:NPC_Attack(victim) -- New Function
 
 end
 
--- Old function, avoid it
+
 function SuperSurvivor:Attack(victim)
 	--if(self.player:getCurrentState() == SwipeStatePlayer.instance()) then return false end -- already attacking wait
 	if(self.player:getModData().felldown) then return false end -- cant attack if stunned by an attack

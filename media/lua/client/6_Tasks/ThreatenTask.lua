@@ -116,23 +116,13 @@ function ThreatenTask:update()
 		
 	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
 		
-		local cs = self.Aite.player:getCurrentSquare()
+	local cs = self.Aite.player:getCurrentSquare()
 	
-		self.parent:walkToDirect(cs)
-		self.parent:setRunning(true) -- Newly added
+	self.parent:walkToDirect(cs)
+	self.parent:setRunning(true) -- Newly added
 	
-		self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
+	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
-	elseif (not self.parent:inFrontOfLockedDoor()) then
-		local cs = self.Aite.player:getCurrentSquare()
-	
-		self.parent:walkTo(cs)
-		self.parent:walkToDirect(cs)
-		self.parent:walkTo(cs)
-		self.parent:setRunning(true) -- Newly added
-		
-		self.parent:DebugSay("ThreatenTask:update - Alt Movement working?")
-		
 	else
 		self.parent:DebugSay("ThreatenTask:update - something is wrong")
 		return false
