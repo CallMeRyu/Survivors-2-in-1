@@ -81,6 +81,7 @@ function AttemptEntryIntoBuildingTask:update()
 		self.parent:MarkBuildingExplored(self.parent:getBuilding())
 		self.TargetSquare = nil
 		self.parent:walkToDirect(outsidesquare)
+		self.parent:walkTo(outsidesquare)
 	--	self:giveUpOnBuilding() 
 	end
 	-- Let the rest of the code do whatever, but make it where if the window is at least barricaded, 
@@ -134,7 +135,11 @@ function AttemptEntryIntoBuildingTask:update()
 			elseif self.TryWindow then
 				if(debugOutput) then print( self.parent:getName() .. " " .."try window true") end
 				if(self.Window == nil) then
-					self.Window = getCloseWindow(self.parent.TargetBuilding,self.parent.player)
+				-- If the line below this marked out line doesn't work? change them.
+				--	self.Window = getCloseWindow(self.parent.TargetBuilding,self.parent.player)
+				--	Update: So far it works. If you want to make NPCs not break the window barricades, use the Alt line
+				--	self.Window = self.parent:getUnBarricadedWindowAlt(self.parent.TargetBuilding)
+					self.Window = self.parent:getUnBarricadedWindow(self.parent.TargetBuilding)
 				end
 				
 				if(not self.Window) then
