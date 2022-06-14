@@ -52,7 +52,7 @@ function PursueTask:update()
 	if(not self:isValid()) or (self:isComplete()) then return false end
 	
 	
-	if(self.parent.player:CanSee(self.Target) == false) then
+	if(self.parent.player:CanSee(self.Target) == false) and (self.parent:inFrontOfLockedDoor() == false) then
 		
 		local distancetoLastSpotSeen = getDistanceBetween(self.LastSquareSeen,self.parent.player)
 		if(distancetoLastSpotSeen > 2.5) then

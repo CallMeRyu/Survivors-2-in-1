@@ -4,22 +4,27 @@ EnabledTranslations["JP"] = true
 
 --weapon tables:
 MeleWeapons = {
-"Base.Hammer","Base.Sledgehammer","Base.BallPeenHammer","Base.WoodenMallet","Base.Wrench","Base.PipeWrench",
-"Base.Shovel","Base.Shovel2","Base.SnowShovel","Base.Rake","Base.LeafRake","Base.Plunger","Base.ClosedUmbrellaRed",
+"Base.Hammer","Base.BallPeenHammer","Base.WoodenMallet","Base.Wrench","Base.PipeWrench",
+"Base.Shovel","Base.Shovel2","Base.Rake","Base.ClosedUmbrellaRed",
 "Base.Plank","Base.Plank","Base.Plank","Base.Plank","Base.PlankNail","Base.PlankNail","Base.PlankNail","Base.MetalPipe","Base.MetalBar",
-"Base.Crowbar","Base.Crowbar","Base.Crowbar","Base.Crowbar","Base.Crowbar",
 "Base.BaseballBat","Base.BaseballBat","Base.BaseballBat","Base.BaseballBatNails",
 "Base.Golfclub","Base.TennisRacket","Base.BadmintonRacket","Base.Poolcue","Base.HockeyStick","Base.LaCrosseStick","Base.IcePick",
 "Base.Pan","Base.Saucepan","Base.GridlePan","Base.RollingPin",
-"Base.GuitarAcoustic","Base.GuitarElectricBlack","Base.GuitarElectricBassBlue","Base.Flute","Base.FishingRod",
+"Base.GuitarAcoustic","Base.GuitarElectricBlack","Base.GuitarElectricBassBlue","Base.Flute",
 
 "Base.GardenFork","Base.WoodenLance",
 "Base.SpearCrafted","Base.SpearCrafted","Base.SpearKnife","Base.SpearScissors","Base.SpearScrewdriver","Base.SpearHuntingKnife",
 
 "Base.Axe","Base.HandAxe","Base.WoodAxe","Base.Pickaxe","Base.AxeStone","Base.HandScythe",
-"Base.Spoon","Base.Fork","Base.Screwdriver","Base.Scalpel","Base.Stake",
+"Base.Stake",
 "Base.KitchenKnife","Base.HuntingKnife","Base.Machete","Base.Katana"
 }; -- RollingPin acts as a torch, setting target on fire
+-- Removed from list 
+-- "Base.Sledgehammer","Base.SnowShovel","Base.LeafRake","Base.Plunger","Base.Crowbar","Base.Crowbar","Base.Crowbar","Base.Crowbar","Base.Crowbar","Base.FishingRod","Base.Spoon","Base.Fork","Base.Screwdriver","Base.Scalpel"
+
+
+
+
 
 if(isModEnabled("ChainSaw")) then
 table.insert(MeleWeapons,"ChainSaw.ChainSaw");
@@ -922,6 +927,157 @@ end
 
 Events.OnEquipPrimary.Add(SuperSurvivorsOnEquipPrimary);
 
+
+-- if(SuperSurvivorSpawnRate ~= 13 or SuperSurvivorSpawnRate ~= 14) then return false end  - hold this
+function SuperSurvivorsNewSurvivorManager()
+	
+	
+	if(getSpecificPlayer(0) == nil) then return false end
+	--this unrelated to raiders but need this to run every once in a while
+	getSpecificPlayer(0):getModData().hitByCharacter = false
+		getSpecificPlayer(0):getModData().semiHostile = false
+		getSpecificPlayer(0):getModData().dealBreaker = nil
+		
+		if(getSpecificPlayer(0):isAsleep())then
+			SSM:AsleepHealAll()
+		end
+	
+	if(getSpecificPlayer(0):getModData().LastRaidTime == nil) then getSpecificPlayer(0):getModData().LastRaidTime = (RaidsStartAfterThisManyHours + 2) end
+	local LastRaidTime = getSpecificPlayer(0):getModData().LastRaidTime
+
+	local mySS = SSM:Get(0)
+	local hours = math.floor(getGameTime():getWorldAgeHours())
+	local chance = RaidChanceForEveryTenMinutes
+	if(mySS ~= nil and not mySS:isInBase()) then
+		chance = (RaidChanceForEveryTenMinutes*1.5)
+	end
+	
+	local RaidersStartTimePassed = (hours >= RaidsStartAfterThisManyHours)
+	local RaiderResult = (ZombRand(chance) == 0)
+	--local RaiderAtLeastTimedExceeded = ((hours - LastRaidTime) >= RaidsAtLeastEveryThisManyHours)
+	local RaiderAtLeastTimedExceeded = ((hours - LastRaidTime) >= 1) -- The timer will now not care
+		
+--	if RaidersStartTimePassed and ( RaiderResult or RaiderAtLeastTimedExceeded ) and mySS ~= nil then
+	
+		local hisGroup = mySS:getGroup()
+		
+		if(hisGroup == nil) then return false end
+		
+		local bounds = hisGroup:getBounds()
+		local center
+		if(bounds) then center = getCenterSquareFromArea(bounds[1],bounds[2],bounds[3],bounds[4],bounds[5]) end
+		if not center then center = getSpecificPlayer(0):getCurrentSquare() end
+		
+		local spawnSquare
+		
+		local success = false
+		local range = 45
+		local drange = range*2
+		
+		for i=1,10 do		
+			
+			local spawnLocation = ZombRand(4)
+			if(spawnLocation ==0) then
+				--mySS:Speak("spawn from north")
+				x = center:getX() + (ZombRand(drange) - range);
+				y = center:getY() - range;
+				
+			elseif(spawnLocation ==1) then 
+				--mySS:Speak("spawn from east")
+				x = center:getX() + range;
+				y = center:getY() + (ZombRand(drange) - range);	
+			elseif(spawnLocation ==2) then 
+				--mySS:Speak("spawn from south")
+				x = center:getX() + (ZombRand(drange) - range);
+				y = center:getY() + range;
+			
+			elseif(spawnLocation ==3) then 
+				--mySS:Speak("spawn from west")
+				x = center:getX() - range;
+				y = center:getY() + (ZombRand(drange) - range);	
+		
+			end
+		
+			spawnSquare = getCell():getGridSquare(x,y,0)
+			
+			if (spawnSquare ~= nil) and (not hisGroup:IsInBounds(spawnSquare)) and spawnSquare:isOutside() and (not spawnSquare:IsOnScreen()) then 
+				success = true
+				break
+			end
+		
+		end
+		
+		
+		if(success) and (spawnSquare) then
+			getSpecificPlayer(0):getModData().LastRaidTime = hours
+			if(getSpecificPlayer(0):isAsleep()) then 
+				getSpecificPlayer(0):Say(getText("ContextMenu_SD_IGotABadFeeling"))
+				getSpecificPlayer(0):forceAwake()
+			else
+				getSpecificPlayer(0):Say("A custom survivor spawned!");
+			end
+			local RaiderGroup = SSGM:newGroup()
+			local GroupSize = ZombRand(1,hisGroup:getMemberCount()) + math.floor(hours/(24*30))
+			if (GroupSize > 10) then GroupSize = 10
+			elseif (GroupSize < 1) then GroupSize = 1 end
+			local oldGunSpawnChance = ChanceToSpawnWithGun 
+			ChanceToSpawnWithGun = ChanceToSpawnWithGun * 1.5
+		
+			for i=1, GroupSize do
+			
+				raider = SuperSurvivorRandomSpawn(spawnSquare)
+				if(i == 1) then RaiderGroup:addMember(raider,"Leader")
+				else RaiderGroup:addMember(raider,"Guard") end
+				raider:setHostile(true)
+				raider.player:getModData().isRobber = true
+				local name = raider:getName()
+				--raider:setName("Raider "..name)
+				raider:setName("Survivor "..name)
+				raider:getTaskManager():AddToTop(WanderTask:new(raider))
+				if(raider:hasWeapon() == false) then raider:giveWeapon(MeleWeapons[ZombRand(1,#MeleWeapons)]) end
+			
+				local food, bag
+				bag = raider:getBag()
+				local count = ZombRand(0,3)
+				for i=1, count do
+					food = "Base."..tostring(CannedFoods[ZombRand(#CannedFoods)+1])
+					bag:AddItem(food)
+				end
+				local count = ZombRand(0,3)
+				for i=1, count do
+					food = "Base."..tostring(PerishableFoods[ZombRand(#PerishableFoods)+1])
+					bag:AddItem(food)
+				end
+				
+				local number = ZombRand(1,3)
+				--setRandomSurvivorSuit(raider,"Rare","Bandit"..tostring(number))
+				  getRandomSurvivorSuit(raider) -- Even if it says 'raider' it's not. 
+			end
+			ChanceToSpawnWithGun = oldGunSpawnChance
+			RaiderGroup:AllSpokeTo()
+			
+		end
+		
+		
+	
+	
+
+end
+
+Events.OnDawn.Add(SuperSurvivorsNewSurvivorManager);
+Events.OnDawn.Add(SuperSurvivorsNewSurvivorManager);
+Events.OnDawn.Add(SuperSurvivorsNewSurvivorManager);
+Events.OnDawn.Add(SuperSurvivorsNewSurvivorManager);
+
+Events.OnDusk.Add(SuperSurvivorsNewSurvivorManager);
+Events.OnDusk.Add(SuperSurvivorsNewSurvivorManager);
+Events.OnDusk.Add(SuperSurvivorsNewSurvivorManager);
+Events.OnDusk.Add(SuperSurvivorsNewSurvivorManager);
+
+
+
+
+
 function SuperSurvivorsRaiderManager()
 
 	if(getSpecificPlayer(0) == nil) then return false end
@@ -1066,10 +1222,9 @@ function SuperSurvivorsRaiderManager()
 
 
 end
-
-
 Events.EveryTenMinutes.Add(SuperSurvivorsRaiderManager);
 NumberOfLocalPlayers = 0
+
 function SSCreatePlayerHandle(newplayerID)
 		
 	local newplayer = getSpecificPlayer(newplayerID)

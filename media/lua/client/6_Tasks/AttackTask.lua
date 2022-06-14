@@ -18,16 +18,22 @@ end
 
 function AttackTask:isComplete()
 	--self.parent.player:Say( tostring(self.parent:needToFollow()) ..",".. tostring(self.parent:getDangerSeenCount() > 0) ..",".. tostring(self.parent.LastEnemeySeen) ..",".. tostring(not self.parent.LastEnemeySeen:isDead()) ..",".. tostring(self.parent:HasInjury() == false) )
-	if(not self.parent:needToFollow()) and ((self.parent:getDangerSeenCount() > 0) or (self.parent:isEnemyInRange(self.parent.LastEnemeySeen) and self.parent:hasWeapon())) and (self.parent.LastEnemeySeen) and not self.parent.LastEnemeySeen:isDead() and (self.parent:HasInjury() == false) then return false
+	if(not self.parent:needToFollow()) and ((self.parent:getDangerSeenCount() > 0) or (self.parent:isEnemyInRange(self.parent.LastEnemeySeen) and self.parent:hasWeapon())) and (self.parent.LastEnemeySeen) and not self.parent.LastEnemeySeen:isDead() and (self.parent:HasInjury() == false) then 
+		return false
 	else 
+		self.parent:DebugSay("Is complete for AttackTask is Returning TRUE" )
 		self.parent:StopWalk()
 		return true 
 	end
 end
 
 function AttackTask:isValid()
-	if (not self.parent) or (not self.parent.LastEnemeySeen) or (not self.parent:isInSameRoom(self.parent.LastEnemeySeen)) or (self.parent.LastEnemeySeen:isDead()) then return false 
-	else return true end
+	if (not self.parent) or (not self.parent.LastEnemeySeen) or (not self.parent:isInSameRoom(self.parent.LastEnemeySeen)) or (self.parent.LastEnemeySeen:isDead()) then 
+			return false 
+		else 
+			self.parent:DebugSay("Is Valid for AttackTask is Returning TRUE" )
+			return true 
+	end
 end
 
 function AttackTask:update()
@@ -58,7 +64,7 @@ function AttackTask:update()
 			end	
 			--if(self.parent:usingGun()) then self.parent.Reducer = 0 end -- force delay when using gun
 		
-	elseif(self.parent:isWalkingPermitted()) then
+	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
 	
 		self.parent:NPC_MovementManagement()
 	
@@ -76,7 +82,7 @@ function AttackTask:update()
 			
 		self.parent:DebugSay("walking close to attack:"..tostring(theDistance))
 	else
-		self.parent:DebugSay("something is wrong")
+		self.parent:DebugSay("ATTACK TASK - something is wrong")
 	end
 	return true
 	

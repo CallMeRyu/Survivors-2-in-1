@@ -137,6 +137,7 @@ function AttemptEntryIntoBuildingTask:update()
 					self.parent:walkToDirect(self.TargetSquare) -- If this doesn't work, use the other
 					self.parent:walkTo(self.TargetSquare)
 					self.parent:Speak("Trying Window!")
+					self.parent:DebugSay("Trying Window!")
 				else
 					self.TryWindow = true
 				end

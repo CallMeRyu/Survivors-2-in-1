@@ -124,7 +124,9 @@ function ThreatenTask:update()
 	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
 		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
 	else
-		self.parent:DebugSay("ThreatenTask:update - something is wrong")
+		self.parent:NPCTask_DoWander() -- Added to the 'if in front of locked door' case
+		self.parent:DebugSay("THREATEN TASK - something is wrong")
+		self.parent:NPCTask_DoAttemptEntryIntoBuilding()
 		return false
 	end
 	

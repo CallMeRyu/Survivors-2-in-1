@@ -104,13 +104,13 @@ function FindUnlootedBuildingTask:update()
 		
 		if not self.TargetSquare then -- wander
 			self.parent:DebugSay("no entry, wander, TicksSinceReversedDir:"..tostring(self.TicksSinceReversedDir))
-			if (self.TicksSinceReversedDir < 17) then
+			if (self.TicksSinceReversedDir <= 15) then
 				self.TicksSinceReversedDir = self.TicksSinceReversedDir + 1
 			end
 
 			if not self.WanderDirection then self.WanderDirection = ZombRand(1,4) end
 	
-			if (self.TicksSinceReversedDir > 20) then -- Meaning just stop movement entirely, so it doesn't lag
+			if (self.TicksSinceReversedDir > 15) then -- Meaning just stop movement entirely, so it doesn't lag
 				self.parent:StopWalk()
 				self.parent:getTaskManager():clear()
 				return false

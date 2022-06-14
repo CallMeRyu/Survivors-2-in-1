@@ -953,13 +953,126 @@ function SuperSurvivor:getBuildingExplored(building)
 	return false
 end
 
-function SuperSurvivor:DebugSay(text)
+function SuperSurvivor:DebugSay(text) 
 
 	if(DebugSayEnabled or self.DebugMode) then
-		print("-----------------------------------------------------")
-		print((os.date ("%c")).." - "..text)
-		print("-----------------------------------------------------")
-		self:Speak(text)
+
+		if (getDistanceBetween(getSpecificPlayer(0),self.player) < 8) then -- if far enough away from player, don't do anything
+		
+			local zLastEnemySeen = 0
+			if (self.LastEnemeySeen ~= nil) then zLastEnemySeen = self.LastEnemeySeen else zLastEnemySeen = 0 end
+			print("")
+			print("")
+			print("")
+			print("========================================== SUPER DEBUG ===================================================")
+			print("----------------------------------------------------------------------------------------------------------")
+			print("")
+			print("----------------------------------------")
+			print("")
+			print("		"..tostring(self:getName()).." = "..text)
+			print("^ General Debug Text")
+			print("")
+			print("----------------------------------------")
+			print("----------------------------------------")
+			print("--------- Detailed Debug Information ---")
+			print("----------------------------------------")
+			print("Current time - "..(os.date ("%c")))
+			print("")
+			print("")
+			
+			if (self:NPC_IsOutside()) 			then print(self:getName().."=	*IS* OUTSIDE") 																						else print(self:getName().."=	IS *NOT* OUTSIDE") end
+			if (self:inUnLootedBuilding())		then print(self:getName().."=	*IS* in a UnLootedBuilding") 																		else print(self:getName().."=	IS *NOT* in front of a UnlootedBuilding") end
+			if (self.LastEnemeySeen ~= nil) 	then print(self:getName().."=	*CAN* RealCanSee Last Enemey 			= True") 													else print(self:getName().."=	CAN *NOT* RealCanSee") end
+			if (self.LastEnemeySeen ~= nil) 	then print(self:getName().."=	isInSameRoom(self.LastEnemeySeen)		= "..tostring(self:isInSameRoom(self.LastEnemeySeen))) 		else print(self:getName().."=	is *NOT* in the same Room with an enemy  (or a nil was returned)") end
+			if (self.LastEnemeySeen ~= nil) 	then print(self:getName().."=	isInSameRoomWithEnemyAlt				= "..tostring(self:isInSameRoomWithEnemyAlt())) 			else print(self:getName().."=	is *NOT* in the same Room with an enemy  (or a nil was returned)") end
+			if (self.LastEnemeySeen ~= nil) 	then print(self:getName().."=	isInSameBuilding(self.LastEnemeySeen)	= "..tostring(self:isInSameBuilding(self.LastEnemeySeen))) 	else print(self:getName().."=	is *NOT* in the same Building with an enemy (or a nil was returned)") end	
+			if (self.LastEnemeySeen ~= nil) 	then print(self:getName().."=	isInSameBuildingWithEnemyAlt			= "..tostring(self:isInSameBuildingWithEnemyAlt())) 		else print(self:getName().."=	is *NOT* in the same Building with an enemy (or a nil was returned)") end	
+			if (self.LastEnemeySeen ~= nil) 	then print(self:getName().."=	NPC_TargetIsOutside (LastEnemySeen)		= "..tostring(self:NPC_TargetIsOutside())) 					else print(self:getName().."=	NPC's Target IS *NOT* outside! (OR Returned a Nil)") end	
+	
+			-- Extra information
+			print("")
+			print("")
+			print("		---- Door Information -----		")			
+			print("		----	IFOD Stands for 'In front of door' 		----")			
+			if(self:inFrontOfDoor()) 					then	print(self:getName().."		inFrontOfDoor					=	true") else print(self:getName().."		inFrontOfDoor						=	false") end
+			if(self:inFrontOfLockedDoor()) 				then	print(self:getName().."		inFrontOfLockedDoor				=	true") else print(self:getName().."		inFrontOfLockedDoor 				=	false") end
+			if(self:inFrontOfLockedDoorAndIsOutside())	then	print(self:getName().."		inFrontOfLockedDoorAndIsOutside =	true") else print(self:getName().."		inFrontOfLockedDoorAndIsOutside		=	false") end
+			if(self:inFrontOfBarricadedDoor()) 			then	print(self:getName().."		inFrontOfBarricadedDoor			=	true") else print(self:getName().."		inFrontOfBarricadedDoor				=	false") end
+			if(self:inFrontOfLockedDoorAndIsInside()) 	then	print(self:getName().."		inFrontOfLockedDoorAndIsInside	=	true") else print(self:getName().."		inFrontOfLockedDoorAndIsInside		=	false") end
+			if(self:NPC_IFOD_BarricadedInside()) 		then	print(self:getName().."		NPC_IFOD_BarricadedInside		=	true") else print(self:getName().."		NPC_IFOD_BarricadedInside			=	false") end
+			if(self:NPC_IFOD_BarricadedOutside()) 		then	print(self:getName().."		NPC_IFOD_BarricadedOutside		=	true") else print(self:getName().."		NPC_IFOD_BarricadedOutside			=	false") end
+
+			print("")
+			print("")
+			print("---- Task -----")
+			print(self:getName().."		getCurrentTask	= "..tostring(self:getCurrentTask()))
+			print(self:getName().."		getGroupRole	= "..tostring(self:getGroupRole()))
+			
+			print("")
+			print("")
+			print("---- More info -----")
+			print("")
+			print(self:getName().."		getBuilding		= "..tostring(self:getBuilding()))
+			print(self:getName().."		getRouteID		= "..tostring(self:getRouteID()))
+			print(self:getName().."		X/Y/Z			= X:"..tostring(self:getX()).." Y:"..tostring(self:getY()).." Z:"..tostring(self:getZ())    )
+			print(self:getName().."		getSneaking		= "..tostring(self:getSneaking()))
+			print(self:getName().."		getFacingSquare	= "..tostring(self:getFacingSquare()))
+			
+			print("")
+			print("---- Seperator -----")
+			print("")
+			print(self:getName().."		getSeenCount		= "..tostring(self:getSeenCount()))
+			print(self:getName().."		getDangerSeenCount	= "..tostring(self:getDangerSeenCount()))
+			print(self:getName().."		isTooScaredToFight	= "..tostring(self:isTooScaredToFight()))
+			print(self:getName().."		isWalkingPermitted	= "..tostring(self:isWalkingPermitted()))
+			
+			print("")
+			print("---- Personal Health -----")
+			print("")
+			print(self:getName().."		HasInjury			= "..tostring(self:HasInjury()))
+			print(self:getName().."		HasMultipleInjury	= "..tostring(self:HasMultipleInjury()))
+
+
+			
+			print("")
+			print("---- Seperator -----")
+			print("")
+			print(self:getName().."		isInCell 			= "..tostring(self:isInCell()))
+			print(self:getName().."		isInBase			= "..tostring(self:isInBase()))
+			print(self:getName().."		isWalking			= "..tostring(self:isWalking()))
+			print(self:getName().."		isInAction			= "..tostring(self:isInAction()))
+			print(self:getName().."		isOnScreen			= "..tostring(self:isOnScreen()))
+			print(self:getName().."		getAttackRange		= "..tostring(self.getAttackRange))
+			
+			print("")
+			print("---- Attack Info -----")
+			print("")
+			print(self:getName().."		LastEnemeySeen		= "..tostring(zLastEnemySeen))
+			print("")
+			print(self:getName().."		CanAttackAlt		= "..tostring(self:CanAttackAlt()))
+			print(self:getName().."		HasSwipedState		= "..tostring(self:HasSwipedState()))
+			print(self:getName().."		HasFellDown			= "..tostring(self:HasFellDown()))
+			print(self:getName().."		AtkTicks_Countdown	= "..tostring(self.AtkTicks))
+			print(self:getName().."		Is_AtkTicksZero		= "..tostring(self:Is_AtkTicksZero()))
+			print(self:getName().."		IsNOT_AtkTicksZero	= "..tostring(self:IsNOT_AtkTicksZero()))
+			print(self:getName().."		hasWeapon			= "..tostring(self:hasWeapon()))
+		
+			-- Large named seperator
+			print(self:getName().."		NPC_TaskCheck_EnterLeaveBuilding = "..tostring(self:NPC_TaskCheck_EnterLeaveBuilding()))
+
+			print("")
+			print("")
+			print("End of This Debug")
+			print("----------------------------------------------------------------------------------------------------------")
+			print("----------------------------------------------------------------------------------------------------------")
+			print("")
+			print("")
+			print("")
+		
+			self:Speak(text)
+		end
+
+		
 	end
 end
 
@@ -1457,14 +1570,21 @@ function SuperSurvivor:walkTo(square)
 		if (door ~= nil) and (door:isLocked() or door:isLockedByKey() or door:isBarricaded()) and (not door:isDestroyed()) then
 			local building = door:getOppositeSquare():getBuilding()
 				self:DebugSay("little pig, little pig")
-		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) and (self:NPC_IsOutside() == true) then
+--		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor() and (self:isInAction() == false)) and (self:NPC_IsOutside() == true) then
+--		if (self:NPC_TaskCheck_EnterLeaveBuilding()) and ( ((self:inFrontOfLockedDoor() == true) and (self:NPC_IsOutside() == true)) or ((self:inFrontOfBarricadedDoor() == true) and (self:NPC_IsOutside() == false)) )then
+		if ( ((self:inFrontOfLockedDoor() == true) and (self:NPC_IsOutside() == true)) or ((self:inFrontOfBarricadedDoor() == true) and (self:NPC_IsOutside() == false)) )then
 			self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
 
 			if (self.TicksSinceSquareChanged > 10) then
-				self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-				self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-				self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				self:getTaskManager():AddToTop(WanderTask:new(self))
+				--self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+				----self:getTaskManager():AddToTop(FindBuildingTask:new(self))
+				--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				--self:getTaskManager():AddToTop(WanderTask:new(self))
+				--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+				self.TicksSinceSquareChanged = 0
+				self:DebugSay("This is when I changed my tasks to wander - Reference number ZA - 0001")
+			else 
 				self.TicksSinceSquareChanged = 0
 			end
 		end
@@ -1520,6 +1640,14 @@ function SuperSurvivor:WalkToPoint(tx, ty, tz)
     end
         
   end
+
+function SuperSurvivor:NPC_TargetIsOutside() -- The LastEnemySeen kind of target the npc is witnessing
+	if self.LastEnemeySeen:isOutside() == true then
+		return true
+	else
+		return false
+	end
+end
 
 function SuperSurvivor:NPC_IsOutside()
 	if self.player:isOutside() then
@@ -1583,6 +1711,28 @@ function SuperSurvivor:inFrontOfBarricadedDoor()
 	local door = self:inFrontOfDoor()
 			
 	if (door ~= nil) and (door:isBarricaded())  then
+		return true
+	else 
+		return false
+	end
+	
+end
+function SuperSurvivor:NPC_IFOD_BarricadedInside() -- IFOD stands for In front of door 
+
+	local door = self:inFrontOfDoor()
+			
+	if (door ~= nil) and (door:isBarricaded()) and (not self.player:isOutside())  then
+		return true
+	else 
+		return false
+	end
+	
+end
+function SuperSurvivor:NPC_IFOD_BarricadedOutside() -- IFOD stands for In front of door 
+
+	local door = self:inFrontOfDoor()
+			
+	if (door ~= nil) and (door:isBarricaded()) and (self.player:isOutside())  then
 		return true
 	else 
 		return false
@@ -1678,7 +1828,7 @@ function SuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding()
 			(self:getTaskManager():getCurrentTask() == "Threaten") or
 			(self:getTaskManager():getCurrentTask() == "Attack") or
 			(self:getTaskManager():getCurrentTask() == "Pursue") or
-			(self:getTaskManager():getCurrentTask() == "Wander") or
+		--	(self:getTaskManager():getCurrentTask() == "Wander") or
 			(self:getTaskManager():getCurrentTask() == "Flee")
 		 )
 	then
@@ -1688,6 +1838,97 @@ function SuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding()
 	end
 	
 end
+-- Individual task checklist. This list is used to help for AI-manager lua to not be a clutter
+function SuperSurvivor:Task_IsAttack()
+	if (self:getTaskManager():getCurrentTask() == "Attack") then
+		return true
+	else
+		return false
+	end
+end
+function SuperSurvivor:Task_IsThreaten()
+	if (self:getTaskManager():getCurrentTask() == "Threaten") then
+		return true
+	else
+		return false
+	end
+end
+function SuperSurvivor:Task_IsSurender()
+	if (self:getTaskManager():getCurrentTask() == "Surender") then
+		return true
+	else
+		return false
+	end
+end
+function SuperSurvivor:Task_IsDoctor()
+	if (self:getTaskManager():getCurrentTask() == "Doctor") then
+		return true
+	else
+		return false
+	end
+end
+function SuperSurvivor:Task_IsWander()
+	if (self:getTaskManager():getCurrentTask() == "Wander") then
+		return true
+	else
+		return false
+	end
+end
+function SuperSurvivor:Task_IsPursue()
+	if (self:getTaskManager():getCurrentTask() == "Pursue") then
+		return true
+	else
+		return false
+	end
+end
+
+
+function SuperSurvivor:NPCTask_DoAttack()
+	if (self:Task_IsAttack() == false) then
+		self:getTaskManager():AddToTop(AttackTask:new(self))
+	end
+end
+function SuperSurvivor:NPCTask_DoWander()
+	if (self:Task_IsAttack() == false) then
+		self:getTaskManager():AddToTop(WanderTask:new(self))
+	end
+end
+
+
+
+function SuperSurvivor:NPCTask_DoAttemptEntryIntoBuilding()
+	self:NPC_ForceFindNearestBuilding()
+	if(self.TargetSquare ~= nil) then
+		if (self:NPC_IsOutside() == true) then
+			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+			self:DebugSay("Do Attempt Entry into Building Triggered!")
+		end
+	end
+end
+
+function SuperSurvivor:Task_IsThreaten_Verify() -- You want this function to return 'true' 
+	if (self.LastEnemeySeen ~= nil) then 
+
+		local LES_GCS = self.LastEnemeySeen:getCurrentSquare()
+		local distance = getDistanceBetween(self.player,self.LastEnemeySeen)
+		
+		if (self:Task_IsThreaten() == true) and (distance > 1)
+			and ((self:NPC_TargetIsOutside()) and (self:NPC_IsOutside()))
+			or	((not self:NPC_TargetIsOutside()) and (not self:NPC_IsOutside()))
+		then
+			self:DebugSay("Task_IsThreaten_Verify Returned TRUE")
+			return true
+		else
+			self:DebugSay("Task_IsThreaten_Verify Returned FALSE")
+			return false
+		end
+	else
+		self:DebugSay("Task_IsThreaten_Verify Returned NIL")
+		return false -- If LastEnemySeen is nil
+	end
+end
+
+
 
 
 function SuperSurvivor:inFrontOfStairs()
@@ -1943,14 +2184,16 @@ function SuperSurvivor:CheckForIfStuck()
 	
 end
 
-
 function SuperSurvivor:update()
+
 	
 	if(self:isDead()) then 
 		
 		return false
 	
 	end
+	
+	self:DoVision() -- Moving this up to the top
 	
 	self.player:setBlockMovement(true)
 	
@@ -2007,7 +2250,7 @@ function SuperSurvivor:update()
 	self:ManageOutdoorStuck()
 	self:CheckForIfStuck() -- New function to cleanup the update() function
 	self:NPCcalculateWalkSpeed()
-	self:DoVision()
+	--self:DoVision()
 	self.MyTaskManager:update()
 
 	--self:Speak(tostring(self:isInBase()))	
@@ -2043,19 +2286,24 @@ end
 
 function SuperSurvivor:ManageOutdoorStuck()
 	-- Todo : remove these lines to test
-	if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) and (self:NPC_IsOutside()) and (self:getTaskManager():getCurrentTask() ~= "Wander") then
+	if (self:NPC_TaskCheck_EnterLeaveBuilding()) and (self:inFrontOfLockedDoor()) and (self:NPC_IsOutside() == true) and (self:getTaskManager():getCurrentTask() ~= "Wander") then
 		self.TicksSinceSquareChanged = self.TicksSinceSquareChanged + 1
 
 		if (self.TicksSinceSquareChanged > 10) then
-			self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
-			self:getTaskManager():AddToTop(FindBuildingTask:new(self))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
 			self:getTaskManager():AddToTop(WanderTask:new(self))
-			self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
-			self:getTaskManager():AddToTop(WanderTask:new(self))
+			--self:getTaskManager():AddToTop(AttemptEntryIntoBuildingTask:new(self, self.TargetBuilding))
+			--self:getTaskManager():AddToTop(WanderTask:new(self))
+			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			--self:getTaskManager():AddToTop(WanderTask:new(self))
+			--self:getTaskManager():AddToTop(FleeFromHereTask:new(self, self:Get():getCurrentSquare()))
+			--self:getTaskManager():AddToTop(WanderTask:new(self))
+			self:DebugSay("This is when I changed my tasks to wander - Reference number ZA - 0003")
 			self.TicksSinceSquareChanged = 0
 		end		
+	else
+		self.TicksSinceSquareChanged = 0
 	end	
+
 end
 	
 function SuperSurvivor:ManageIndoorStuck()
@@ -2066,8 +2314,11 @@ function SuperSurvivor:ManageIndoorStuck()
 			self:StopWalk()
 			self:getTaskManager():clear()
 			self:getTaskManager():AddToTop(WanderTask:new(self))
+			self:DebugSay("This is when I changed my tasks to wander - Reference number ZA - 0002")
 			self.TicksSinceSquareChanged = 0
 		end
+	else
+		self.TicksSinceSquareChanged = 0
 	end
 
 end
@@ -2100,7 +2351,7 @@ function SuperSurvivor:PlayerUpdate()
 
 	if(not self.player:isLocalPlayer()) then
 	
-		if(self.TriggerHeldDown) and (self:CanAttackAlt()) then -- simulate automatic weapon fire
+		if(self.TriggerHeldDown) and (self:CanAttackAlt() == true) then -- simulate automatic weapon fire
 			self:NPC_Attack(self.LastEnemeySeen)
 		end
 		
@@ -2879,15 +3130,30 @@ function SuperSurvivor:NPC_MovementManagement()
 	
 		self:DebugSay("MovementManagement: "..tostring(self.AtkTicks))
 end
- 
-function SuperSurvivor:CanAttackAlt()
-	if
-		(not self.player:getCurrentState() == SwipeStatePlayer.instance()) or 	-- Is in the middle of an attack
-		(not self.player:getModData().felldown)  								-- Has fallen on the ground
-	then 
-		return true 															-- Because NPC shouldn't be able to attack when already hitting, has fallen, or hit by something
+
+function SuperSurvivor:HasSwipedState()
+	if (self.player:getCurrentState() == SwipeStatePlayer.instance()) then
+		return true
 	else
 		return false
+	end
+end
+function SuperSurvivor:HasFellDown()
+	if (self.player:getModData().felldown) then
+		return true
+	else
+		return false
+	end
+end
+	
+function SuperSurvivor:CanAttackAlt()
+	if
+		(self.player:getCurrentState() == SwipeStatePlayer.instance()) or 	-- Is in the middle of an attack | WAS AN 'or' statement
+		(self.player:getModData().felldown)  								-- Has fallen on the ground
+	then 
+		return false 															-- Because NPC shouldn't be able to attack when already hitting, has fallen, or hit by something
+	else
+		return true
 	end
 end
 -- The new function that will now control NPC attacking. Not perfect, but. Cleaner code, and works better-ish.
@@ -2929,7 +3195,7 @@ function SuperSurvivor:NPC_Attack(victim) -- New Function
 
 	-- Hitting the entity in question
 --	if((RealDistance <= minrange) or (RealDistance <= 0.65)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
-	if((RealDistance <= minrange)) and (self.AtkTicks <= 0) and (self:CanAttackAlt()) then
+	if((RealDistance <= minrange)) and (self.AtkTicks <= 0) and (self:CanAttackAlt() == true) then
 		victim:Hit(weapon, self.player, damage, false, 1.0, false)
 		self.AtkTicks = 3
 	end	
@@ -3571,4 +3837,12 @@ function SuperSurvivor:isEnemyInRange(enemy)
 	--print(self:getName().." my attack range is: " .. tostring(self:getAttackRange()) .. " - " ..tostring(result))
 	
 	return result
+end
+
+
+function SuperSurvivor:NPC_ForceFindNearestBuilding()
+		
+	if(self.TargetSquare ~= nil) and (self.TargetSquare:getRoom()) and (self.TargetSquare:getRoom():getBuilding()) then 
+		self.TargetBuilding = self.TargetSquare:getRoom():getBuilding() 
+	end
 end
