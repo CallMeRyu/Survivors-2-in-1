@@ -190,7 +190,7 @@ function SuperSurvivorManager:update()
 	
 		if(self.SuperSurvivors[i] ~= nil) and (self.MainPlayer ~= i) and (self.SuperSurvivors[i]:updateTime()) and (not self.SuperSurvivors[i].player:isAsleep()) and (self.SuperSurvivors[i]:isInCell()) then 
 			self.SuperSurvivors[i]:update() 
-			if(self.SuperSurvivors[i].DebugMode) then print(self.SuperSurvivors[i]:getName() .. " update()") end
+		--	if(self.SuperSurvivors[i].DebugMode) then print(self.SuperSurvivors[i]:getName() .. " update()") end
 		end
 	end
 

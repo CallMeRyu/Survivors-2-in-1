@@ -37,6 +37,9 @@ function AttackTask:isValid()
 end
 
 function AttackTask:update()
+	
+	self.parent:NPC_MovementManagement() -- To move around 
+	
 	--print(self.parent:getName().. " AttackTask:update" )
 	if(not self:isValid()) or (self:isComplete()) then return false end
 	local theDistance = getDistanceBetween(self.parent.LastEnemeySeen, self.parent.player)
@@ -64,22 +67,12 @@ function AttackTask:update()
 			end	
 			--if(self.parent:usingGun()) then self.parent.Reducer = 0 end -- force delay when using gun
 		
-	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
+	elseif(self.parent:isWalkingPermitted()) then
 	
-		self.parent:NPC_MovementManagement()
+		self.parent:NPC_ManageLockedDoors() -- To prevent getting stuck in doors
+		--self.parent:NPC_MovementManagement() -- To move around 
 	
---		local cs = self.parent.LastEnemeySeen:getCurrentSquare()
---		if(instanceof(self.parent.LastEnemeySeen,"IsoPlayer")) then
---		self.parent:walkToDirect(cs)
---		else
---			local fs = cs:getTileInDirection(self.parent.LastEnemeySeen:getDir())
---			if(fs) and (fs:isFree(true)) then
---				self.parent:walkToDirect(fs)
---			else 
---				self.parent:walkToDirect(cs)
---			end
---		end
-			
+
 		self.parent:DebugSay("walking close to attack:"..tostring(theDistance))
 	else
 		self.parent:DebugSay("ATTACK TASK - something is wrong")

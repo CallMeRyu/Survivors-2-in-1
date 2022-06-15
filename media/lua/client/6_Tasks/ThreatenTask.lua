@@ -61,8 +61,8 @@ function ThreatenTask:dealComplete()
 	if self.StartedThreatening then
 	
 		if Demands == "Scram" then
-			if self.theDistance >= 30 and not self.parent.player:CanSee(self.Aite.player) then 
-				print(self.parent:getName() .. " ThreatenTask complete")
+			if self.theDistance >= 20 and not self.parent.player:CanSee(self.Aite.player) then 
+				self.parent:DebugSay(self.parent:getName() .. " ThreatenTask complete")
 				return true 
 			end
 		end
@@ -114,17 +114,20 @@ function ThreatenTask:update()
 					self.StartedThreatening = true
 				end
 		
-	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
+--	elseif(self.parent:isWalkingPermitted() and (not self.parent:inFrontOfLockedDoor())) then
+	elseif(self.parent:isWalkingPermitted()) then
+
+		self.parent:NPC_ManageLockedDoors() -- This function should force walking away if stuck
+	
+		local cs = self.Aite.player:getCurrentSquare()
 		
-	local cs = self.Aite.player:getCurrentSquare()
-	
-	self.parent:walkToDirect(cs)
-	self.parent:setRunning(true) -- Newly added
-	
-	self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
-		--self.parent:Speak("walking close to attack:"..tostring(self.theDistance))
+		self.parent:walkToDirect(cs)
+		self.parent:setRunning(true) -- Newly added
+		
+		--self.parent:DebugSay("walking close to threaten:"..tostring(self.theDistance))
+
 	else
-		self.parent:NPCTask_DoWander() -- Added to the 'if in front of locked door' case
+		self.parent:NPCTask_DoWander() -- Added to the 'if anything fails, go somewhere else'
 		self.parent:DebugSay("THREATEN TASK - something is wrong")
 		self.parent:NPCTask_DoAttemptEntryIntoBuilding()
 		return false

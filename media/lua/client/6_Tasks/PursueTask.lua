@@ -51,8 +51,9 @@ function PursueTask:update()
 	
 	if(not self:isValid()) or (self:isComplete()) then return false end
 	
+	self.parent:NPC_ManageLockedDoors() -- To be sure the NPC doesn't get stuck in front of doors
 	
-	if(self.parent.player:CanSee(self.Target) == false) and (self.parent:inFrontOfLockedDoor() == false) then
+	if(self.parent.player:CanSee(self.Target) == false) then
 		
 		local distancetoLastSpotSeen = getDistanceBetween(self.LastSquareSeen,self.parent.player)
 		if(distancetoLastSpotSeen > 2.5) then

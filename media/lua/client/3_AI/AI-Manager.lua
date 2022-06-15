@@ -2,6 +2,7 @@
 function AIManager(TaskMangerIn)
 	
 	local ASuperSurvivor = TaskMangerIn.parent	
+	local NPC = TaskMangerIn.parent	
 --	if(ASuperSurvivor.DebugMode) then ASuperSurvivor:DebugSay(ASuperSurvivor:getName().." "..ASuperSurvivor:getAIMode() .. " AIManager1 " .. TaskMangerIn:getCurrentTask()) end
 	
 	if(ASuperSurvivor:needToFollow()) or (ASuperSurvivor:Get():getVehicle() ~= nil) then return TaskMangerIn end
@@ -45,11 +46,10 @@ function AIManager(TaskMangerIn)
 		-------------shared ai for all -----------------------------------------------
 
 -- Enable back later 	
---	if (TaskMangerIn:getCurrentTask() ~= "Enter New Building") and (TaskMangerIn:getCurrentTask() ~= "Threaten") and ASuperSurvivor:isWalkingPermitted() and EnemyIsSurvivor and ASuperSurvivor:hasWeapon() and (EnemyIsSurvivorHasGun == false or ASuperSurvivor:hasGun()) and (ASuperSurvivor.LastEnemeySeen ~= nil) and (ASuperSurvivor:getDangerSeenCount() == 0) and (IHaveInjury == false) and TaskMangerIn:getCurrentTask() ~= "Pursue" then
---		if(ASuperSurvivor:Get():getModData().isHostile) and (ASuperSurvivor:isSpeaking() == false) then ASuperSurvivor:Speak(getSpeech("GonnaGetYou")) end
---		TaskMangerIn:AddToTop(PursueTask:new(ASuperSurvivor,ASuperSurvivor.LastEnemeySeen))
---	end
-	
+	if (TaskMangerIn:getCurrentTask() ~= "Threaten") and ASuperSurvivor:isWalkingPermitted() and EnemyIsSurvivor and ASuperSurvivor:hasWeapon() and (EnemyIsSurvivorHasGun == false or ASuperSurvivor:hasGun()) and (ASuperSurvivor.LastEnemeySeen ~= nil) and (ASuperSurvivor:getDangerSeenCount() == 0) and (IHaveInjury == false) and TaskMangerIn:getCurrentTask() ~= "Pursue" then
+		if(ASuperSurvivor:Get():getModData().isHostile) and (ASuperSurvivor:isSpeaking() == false) then ASuperSurvivor:Speak(getSpeech("GonnaGetYou")) end
+		TaskMangerIn:AddToTop(PursueTask:new(ASuperSurvivor,ASuperSurvivor.LastEnemeySeen))
+	end
 
 	-- Surrender Task	
 	if(getSpecificPlayer(0) ~= nil) then
@@ -73,29 +73,13 @@ function AIManager(TaskMangerIn)
 			return TaskMangerIn
 		end
 	end
-
-	-- Is NPC stuck in front of a locked door outside? Let's fix that (also 'Enter New Building' is attemptentryintobuildingtask)
-	--	if (TaskMangerIn:getCurrentTask() ~= "Enter New Building") and (ASuperSurvivor:inFrontOfLockedDoorAndIsOutside()) then
---	if ASuperSurvivor:NPC_TaskCheck_EnterLeaveBuilding() and (ASuperSurvivor:inFrontOfLockedDoor()) then
---		if (ASuperSurvivor.TargetBuilding ~= nil) then 
---				ASuperSurvivor.TargetBuilding = ASuperSurvivor:getBuilding()	
---		
---				ASuperSurvivor:DebugSay("You thought you outsmarted me, huh?")
---				if (ASuperSurvivor:NPC_IsOutside()) then
---					TaskMangerIn:AddToTop(AttemptEntryIntoBuildingTask:new(ASuperSurvivor, ASuperSurvivor.TargetBuilding))
---				end
---				--TaskMangerIn:AddToTop(FindBuildingTask:new(ASuperSurvivor))
---				-- This *seems* to work. After finding new building, it will attempt new entry?
---		end
---	end
 	
 	if ((TaskMangerIn:getCurrentTask() ~= "Attack") and (TaskMangerIn:getCurrentTask() ~= "Threaten") and not ((TaskMangerIn:getCurrentTask() == "Surender") and EnemyIsSurvivor) and (TaskMangerIn:getCurrentTask() ~= "Doctor") and (ASuperSurvivor:isInSameRoom(ASuperSurvivor.LastEnemeySeen)) and (TaskMangerIn:getCurrentTask() ~= "Flee")) and ((ASuperSurvivor:hasWeapon() and ((ASuperSurvivor:getDangerSeenCount() >= 1) or (ASuperSurvivor:isEnemyInRange(ASuperSurvivor.LastEnemeySeen)))) or (ASuperSurvivor:hasWeapon() == false and (ASuperSurvivor:getDangerSeenCount() == 1) and (not EnemyIsSurvivor))) and (IHaveInjury == false) and (ASuperSurvivor:inFrontOfLockedDoor() == false)  then
 		if(ASuperSurvivor.player ~= nil) and (ASuperSurvivor.player:getModData().isRobber) and (not ASuperSurvivor.player:getModData().hitByCharacter) and EnemyIsSurvivor and (not EnemySuperSurvivor.player:getModData().dealBreaker) then 
 			TaskMangerIn:AddToTop(ThreatenTask:new(ASuperSurvivor,EnemySuperSurvivor,"Scram"))
 			ASuperSurvivor:DebugSay("Threaten/Attack Task condition triggered! Reference Number ATC_000_01")
 		else 
-			TaskMangerIn:AddToTop(ThreatenTask:new(ASuperSurvivor,EnemySuperSurvivor,"Scram"))
-			TaskMangerIn:AddToTop(AttackTask:new(ASuperSurvivor)) 
+			NPC:NPCTask_DoAttack()
 			ASuperSurvivor:DebugSay("Threaten/Attack Task condition triggered! Reference Number ATC_000_02")
 		end
 	end
